@@ -87,4 +87,4 @@ app.get('/rewards', (req, res) => {
 });
 
 
-app.listen(3000, () => console.log('✅ Server đang chạy tại: http://localhost:3000'));
+app.listen(3000, () => console.log('✅ Server đang chạy tại: https://greencycle-gwyz.onrender.com'));
