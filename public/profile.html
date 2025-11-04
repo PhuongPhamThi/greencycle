@@ -133,7 +133,7 @@
             // (Hàm loadProfile() giữ nguyên)
             async function loadProfile() {
                 try {
-                    const res = await fetch('http://localhost:3000/api/auth/profile', {
+                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/profile', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -170,7 +170,7 @@
                 const listEl = document.getElementById('rewardHistoryList');
                 const loadingEl = document.getElementById('rewardHistoryLoading');
                 try {
-                    const res = await fetch('http://localhost:3000/api/rewards/history', {
+                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/rewards/history', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -206,7 +206,7 @@
                 const userId = jwt_decode(token).userId; 
                 
                 try {
-                    const res = await fetch(`http://localhost:3000/api/auth/waste/${userId}`, {
+                    const res = await fetch(`https://greencycle-gwyz.onrender.com/api/auth/waste/${userId}`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -254,7 +254,7 @@
                     return; 
                 }
                 try {
-                    const res = await fetch('http://localhost:3000/api/auth/profile', {
+                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/profile', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ name, phone, address })
@@ -275,7 +275,7 @@
             document.getElementById('cancelDisable').addEventListener('click', () => { modal.classList.add('hidden'); });
             document.getElementById('confirmDisable').addEventListener('click', async () => {
                 try {
-                    const res = await fetch('http://localhost:3000/api/auth/profile', {
+                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/profile', {
                         method: 'DELETE',
                         headers: { 'Authorization': `Bearer ${token}` }
                     });

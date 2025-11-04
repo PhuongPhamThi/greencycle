@@ -68,7 +68,7 @@
             e.preventDefault();
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
-            fetch('http://localhost:3000/api/contact', {
+            fetch('https://greencycle-gwyz.onrender.com/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),

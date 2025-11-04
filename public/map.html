@@ -57,7 +57,7 @@
         const recycleLayer = L.layerGroup().addTo(map);
 
         // **SỬA ĐƯỜNG DẪN API (thêm /auth)**
-        fetch('http://localhost:3000/api/auth/waste/search?q=')
+        fetch('https://greencycle-gwyz.onrender.com/api/auth/waste/search?q=')
         .then(response => response.json())
         .then(data => {
             if (!Array.isArray(data)) return;

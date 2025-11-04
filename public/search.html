@@ -138,7 +138,7 @@
                 
                 try {
                     // API này đã được nâng cấp (thêm /auth)
-                    const res = await fetch(`http://localhost:3000/api/auth/waste/search?q=${encodeURIComponent(query)}&status=pending`, {
+                    const res = await fetch(`https://greencycle-gwyz.onrender.com/api/auth/waste/search?q=${encodeURIComponent(query)}&status=pending`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
@@ -220,7 +220,7 @@
                 button.textContent = 'Đang xử lý...';
 
                 try {
-                    const res = await fetch('http://localhost:3000/api/auth/collection/claim', {
+                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/collection/claim', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ wasteId: wasteId })

@@ -97,7 +97,7 @@
             document.getElementById('userName').textContent = userName;
 
             // Fetch Lấy điểm xanh
-            fetch('http://localhost:3000/api/auth/points', {
+            fetch('https://greencycle-gwyz.onrender.com/api/auth/points', {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then(res => res.json())
@@ -108,7 +108,7 @@
                 .catch(err => showToast('Lỗi: ' + err.message, false));
 
             // Fetch Lấy danh sách chất thải
-            fetch(`http://localhost:3000/api/auth/waste/${userId}`, {
+            fetch(`https://greencycle-gwyz.onrender.com/api/auth/waste/${userId}`, {
                 headers: { Authorization: `Bearer ${token}` },
             })
                 .then(res => res.json())
@@ -180,7 +180,7 @@
                 const formData = new FormData(e.target);
                 const data = Object.fromEntries(formData);
                 
-                fetch('http://localhost:3000/api/auth/waste/post', {
+                fetch('https://greencycle-gwyz.onrender.com/api/auth/waste/post', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
                     body: JSON.stringify(data),
