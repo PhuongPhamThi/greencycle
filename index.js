@@ -3,7 +3,6 @@ const cors = require('cors');
 const admin = require('firebase-admin');
 const jwt = require('jsonwebtoken');
 const multer = require('multer');
-const cors = require('cors');
 const bodyParser = require('body-parser');
 require('dotenv').config();
 
