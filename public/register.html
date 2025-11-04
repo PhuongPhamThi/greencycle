@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Đăng ký</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        body {
+            background-color: #f3f4f6;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        .hero {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url('https://images.unsplash.com/photo-1600585154340-be6161a56a0c?auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            height: 20vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: white;
+        }
+        .nav-container { padding: 0.5rem 1rem; }
+        .nav-menu { transition: all 0.3s ease-in-out; }
+        .nav-menu.active { display: flex !important; }
+        .loading { display: none; position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); z-index: 1000; }
+        .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); padding: 1rem 2rem; border-radius: 0.5rem; color: white; z-index: 1000; animation: slideUp 0.5s ease-out; }
+        @keyframes slideUp { from { bottom: -50px; opacity: 0; } to { bottom: 20px; opacity: 1; } }
+    </style>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+    <header class="bg-green-700 text-white py-4 shadow-md sticky top-0 z-50 w-full">
+        <div class="nav-container max-w-7xl mx-auto flex justify-between items-center px-4">
+            <a href="/" class="nav-logo text-2xl font-bold hover:text-green-200 transition-colors">GREENCYCLE</a>
+            <button class="nav-toggle md:hidden text-2xl focus:outline-none" id="navToggle"><span class="text-white">&equiv;</span></button>
+            <ul class="nav-menu hidden md:flex space-x-6 items-center">
+                <li class="nav-item"><a href="/login.html" class="nav-link hover:text-green-200 transition-colors">Đăng nhập</a></li>
+                <li class="nav-item"><a href="/register.html" class="nav-link hover:text-green-200 transition-colors">Đăng ký</a></li>
+                <li class="nav-item"><a href="#about" class="nav-link hover:text-green-200 transition-colors">Giới thiệu</a></li>
+            </ul>
+        </div>
+    </header>
+
+    <section class="flex-1 flex justify-center items-center w-full">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-full max-w-md relative">
+            <h2 class="text-2xl font-semibold text-center mb-4">Đăng ký</h2>
+            <form id="registerForm" class="space-y-4">
+                <input type="text" name="name" placeholder="Tên" class="w-full p-2 border rounded" required>
+                <input type="email" name="email" placeholder="Email" class="w-full p-2 border rounded" required>
+                <input type="password" name="password" placeholder="Mật khẩu" class="w-full p-2 border rounded" required>
+                <select name="role" class="w-full p-2 border rounded" required>
+                    <option value="household">Hộ Gia Đình</option>
+                    <option value="business">Doanh Nghiệp</option>
+                </select>
+                <button type="submit" class="w-full bg-green-600 text-white p-2 rounded hover:bg-green-700" id="registerBtn">Đăng ký</button>
+            </form>
+            <p class="text-center mt-2"><a href="/login.html" class="text-green-600 hover:underline">Đã có tài khoản? Đăng nhập</a></p>
+            <div id="loading" class="loading">
+                <div class="border-4 border-t-4 border-green-600 rounded-full w-8 h-8 animate-spin"></div>
+            </div>
+        </div>
+    </section>
+
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script>
+        // Cấu hình Firebase
+        const firebaseConfig = {
+            apiKey: "AIzaSyBRucHKlUpBsYegzc-OXAd7_CyMDG2BfAA",
+            authDomain: "greencycle-4ca3c.firebaseapp.com",
+            databaseURL: "https://greencycle-4ca3c-default-rtdb.asia-southeast1.firebasedatabase.app",
+            projectId: "greencycle-4ca3c",
+            storageBucket: "greencycle-4ca3c.firebasestorage.app",
+            messagingSenderId: "692058245335",
+            appId: "1:692058245335:web:7566b5ed4526e15d56c892",
+            measurementId: "G-23M6XSHXK6"
+        };
+
+        // Khởi tạo Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+
+        const registerForm = document.getElementById('registerForm');
+        const registerBtn = document.getElementById('registerBtn');
+        const loading = document.getElementById('loading');
+
+        function showLoading() {
+            registerBtn.disabled = true;
+            loading.style.display = 'block';
+        }
+
+        function hideLoading() {
+            registerBtn.disabled = false;
+            loading.style.display = 'none';
+        }
+
+        function showToast(message, isSuccess = true) {
+            const toast = document.createElement('div');
+            toast.className = `toast ${isSuccess ? 'bg-green-600' : 'bg-red-600'}`;
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 3000);
+        }
+
+        registerForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            showLoading();
+            const name = registerForm.name.value;
+            const email = registerForm.email.value;
+            const password = registerForm.password.value;
+            const role = registerForm.role.value;
+
+            try {
+                console.log('Attempting registration with:', { name, email, password, role });
+                const response = await fetch('http://localhost:3000/api/auth/register', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ name, email, password, role }),
+                });
+                console.log('Backend response status:', response.status);
+                const data = await response.json();
+                hideLoading();
+                if (response.ok && data.success) {
+                    console.log('Registration successful, idToken:', data.idToken);
+                    showToast(data.message, true);
+                    setTimeout(() => window.location.href = '/login.html', 1000);
+                } else {
+                    console.log('Registration failed, response:', data);
+                    showToast(data.message || 'Đăng ký thất bại, vui lòng thử lại.', false);
+                }
+            } catch (err) {
+                hideLoading();
+                console.error('Registration error:', err);
+                showToast('Lỗi: ' + (err.message || 'Không thể kết nối đến server'), false);
+            }
+        });
+
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('hidden');
+            navMenu.classList.toggle('flex');
+            navMenu.classList.toggle('flex-col');
+            navMenu.classList.toggle('space-y-4');
+            navMenu.classList.toggle('absolute');
+            navMenu.classList.toggle('top-16');
+            navMenu.classList.toggle('left-0');
+            navMenu.classList.toggle('w-full');
+            navMenu.classList.toggle('bg-green-700');
+            navMenu.classList.toggle('py-4');
+            navMenu.classList.toggle('z-50');
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Hồ sơ cá nhân</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
+
+    <style>
+        body { background: linear-gradient(to bottom, #f0fdf4, #dcfce7); font-family: 'Inter', sans-serif; }
+        .container-profile { max-width: 5xl; margin: 2rem auto; padding: 1.5rem; }
+        .card-profile { background: white; border-radius: 1rem; box-shadow: 0 10px 25px rgba(0,0,0,0.1); overflow: hidden; }
+        .avatar { width: 120px; height: 120px; object-fit: cover; }
+        .input-focus:focus { outline: none; ring: 2px solid #10b981; border-color: #10b981; }
+        .history-list { max-height: 300px; overflow-y: auto; padding-right: 0.5rem; }
+    </style>
+</head>
+<body class="bg-green-50">
+    
+    <header id="navbar-placeholder"></header>
+
+    <div class="container-profile">
+        <div class="card-profile">
+            <div class="bg-gradient-to-r from-green-600 to-green-800 text-white p-8 text-center">
+                <img id="avatarImg" src="https://via.placeholder.com/120" alt="Avatar" class="avatar rounded-full mx-auto border-4 border-white shadow-lg">
+                <h1 id="profileName" class="text-3xl font-bold mt-4">Đang tải...</h1>
+                <p id="profileEmail" class="text-green-100"></p>
+            </div>
+
+            <div class="p-8">
+                <h2 class="text-2xl font-semibold text-green-700 mb-6 flex items-center">
+                    <i class="fas fa-user-edit mr-2"></i> Thông tin cá nhân
+                </h2>
+                <form id="editProfileForm" class="space-y-6">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Họ tên</label>
+                            <input type="text" id="editName" class="w-full p-3 border rounded-lg input-focus" required>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Số điện thoại</label>
+                            <input type="tel" id="editPhone" class="w-full p-3 border rounded-lg input-focus" placeholder="0901234567">
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">Địa chỉ</label>
+                        <input type="text" id="editAddress" class="w-full p-3 border rounded-lg input-focus" placeholder="123 Đường Láng, Hà Nội">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                            <p id="profileEmailForm" class="p-3 bg-gray-100 rounded-lg font-medium"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Vai trò</label>
+                            <p id="profileRole" class="p-3 bg-gray-100 rounded-lg font-medium"></p>
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Điểm xanh</label>
+                            <p id="profilePoints" class="p-3 bg-yellow-100 text-yellow-800 rounded-lg font-bold text-xl"></p>
+                        </div>
+                    </div>
+                    <div class="flex justify-between items-center pt-6 border-t">
+                        <button type="submit" class="bg-green-600 text-white px-6 py-3 rounded-lg btn font-medium">
+                            <i class="fas fa-save mr-2"></i> Lưu thay đổi
+                        </button>
+                        <button type="button" id="disableAccountBtn" class="bg-red-600 text-white px-6 py-3 rounded-lg btn font-medium">
+                            <i class="fas fa-user-slash mr-2"></i> Vô hiệu hóa tài khoản
+                        </button>
+                    </div>
+                </form>
+
+                <div id="historyContainer" class="mt-12 pt-6 border-t grid grid-cols-1 md:grid-cols-2 gap-8" style="display: none;">
+                    <div>
+                        <h2 class="text-2xl font-semibold text-green-700 mb-6 flex items-center">
+                            <i class="fas fa-history mr-2"></i> Lịch sử Đăng rác
+                        </h2>
+                        <div id="wasteHistoryList" class="history-list space-y-3">
+                            <p id="wasteHistoryLoading" class="text-gray-500">Đang tải lịch sử...</p>
+                        </div>
+                    </div>
+                    <div>
+                        <h2 class="text-2xl font-semibold text-green-700 mb-6 flex items-center">
+                            <i class="fas fa-gift mr-2"></i> Lịch sử Đổi thưởng
+                        </h2>
+                        <div id="rewardHistoryList" class="history-list space-y-3">
+                            <p id="rewardHistoryLoading" class="text-gray-500">Đang tải lịch sử...</p>
+                        </div>
+                    </div>
+                </div> 
+            </div> 
+        </div> 
+    </div> 
+
+    <div id="disableModal" class="fixed inset-0 bg-black bg-opacity-50 hidden flex items-center justify-center z-50">
+        <div class="bg-white p-6 rounded-lg shadow-xl max-w-md w-full">
+            <h3 class="text-xl font-bold text-red-600 mb-4">Xác nhận vô hiệu hóa tài khoản</h3>
+            <p class="text-gray-700 mb-6">Hành động này sẽ <strong>khóa tài khoản</strong> của bạn. Bạn sẽ không thể đăng nhập nữa.</p>
+            <div class="flex justify-end space-x-3">
+                <button id="cancelDisable" class="px-4 py-2 bg-gray-300 rounded hover:bg-gray-400">Hủy</button>
+                <button id="confirmDisable" class="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700">Xác nhận</button>
+            </div>
+        </div>
+    </div>
+
+    <footer id="footer-placeholder"></footer>
+
+    <script src="js/jwt-decode.min.js"></script>
+    <script src="script.js"></script> <script src="js/navbar.js"></script> <script src="js/footer.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { // Bọc trong DOMContentLoaded
+            
+            // XÓA: hàm showToast() (đã có trong script.js)
+            // XÓA: hàm navLogout() (đã có trong navbar.js)
+
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Vui lòng đăng nhập!', false);
+                setTimeout(() => window.location.href = '/login.html', 1000);
+                return; // Dừng chạy script
+            }
+            
+            const userRole = jwt_decode(token).role;
+
+            // (Hàm loadProfile() giữ nguyên)
+            async function loadProfile() {
+                try {
+                    const res = await fetch('http://localhost:3000/api/auth/profile', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (!data.success) { 
+                        showToast(data.message || 'Không tải được thông tin!', false);
+                        return; 
+                    }
+                    
+                    const p = data.profile;
+                    document.getElementById('profileName').textContent = p.name;
+                    document.getElementById('profileEmail').textContent = p.email;
+                    if (p.avatar) document.getElementById('avatarImg').src = p.avatar;
+                    document.getElementById('editName').value = p.name;
+                    document.getElementById('editPhone').value = p.phone || '';
+                    document.getElementById('editAddress').value = p.address || '';
+                    document.getElementById('profileEmailForm').textContent = p.email;
+                    
+                    let roleText = p.role;
+                    if(p.role === 'household') roleText = 'Hộ Gia đình';
+                    if(p.role === 'business') roleText = 'Doanh nghiệp (Bên Bán)';
+                    if(p.role === 'recycler') roleText = 'Đối tác Tái chế (Bên Mua)';
+                    if(p.role === 'admin') roleText = 'Quản trị viên';
+                    document.getElementById('profileRole').textContent = roleText;
+                    document.getElementById('profilePoints').textContent = p.points;
+
+                } catch (err) {
+                    console.error('Lỗi tải profile:', err);
+                    showToast('Lỗi kết nối!', false);
+                }
+            }
+            
+            // (Hàm loadRewardHistory() giữ nguyên)
+            async function loadRewardHistory() {
+                const listEl = document.getElementById('rewardHistoryList');
+                const loadingEl = document.getElementById('rewardHistoryLoading');
+                try {
+                    const res = await fetch('http://localhost:3000/api/rewards/history', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    
+                    if (!data.success || data.history.length === 0) {
+                        loadingEl.textContent = 'Bạn chưa đổi phần thưởng nào.';
+                        return;
+                    }
+                    loadingEl.style.display = 'none';
+                    listEl.innerHTML = ''; 
+
+                    data.history.forEach(item => {
+                        const div = document.createElement('div');
+                        div.className = 'p-3 bg-gray-50 rounded-md flex justify-between items-center';
+                        div.innerHTML = `
+                            <div>
+                                <strong class="text-gray-800">${item.rewardName}</strong>
+                                <p class="text-sm text-gray-500">Ngày: ${new Date(item.redeemedAt).toLocaleDateString('vi-VN')}</p>
+                            </div>
+                            <span class="font-bold text-red-600">-${item.pointsUsed} điểm</span>
+                        `;
+                        listEl.appendChild(div);
+                    });
+                } catch (err) {
+                    loadingEl.textContent = 'Lỗi tải lịch sử đổi thưởng.';
+                }
+            }
+
+            // (Hàm loadWasteHistory() giữ nguyên)
+            async function loadWasteHistory() {
+                const listEl = document.getElementById('wasteHistoryList');
+                const loadingEl = document.getElementById('wasteHistoryLoading');
+                const userId = jwt_decode(token).userId; 
+                
+                try {
+                    const res = await fetch(`http://localhost:3000/api/auth/waste/${userId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    
+                    if (!Array.isArray(data) || data.length === 0) {
+                        loadingEl.textContent = 'Bạn chưa đăng mục rác nào.';
+                        return;
+                    }
+                    loadingEl.style.display = 'none';
+                    listEl.innerHTML = ''; 
+
+                    data.reverse().slice(0, 10).forEach(item => { // Chỉ hiển thị 10 mục mới nhất
+                        const div = document.createElement('div');
+                        div.className = 'p-3 bg-gray-50 rounded-md flex justify-between items-center';
+                        
+                        let statusText = 'Đang chờ';
+                        let statusColor = 'text-yellow-600';
+                        if (item.status === 'collected' || item.status === 'in_progress') {
+                            statusText = 'Đã thu gom';
+                            statusColor = 'text-green-600';
+                        }
+
+                        div.innerHTML = `
+                            <div>
+                                <strong class="text-gray-800">${item.type} (${item.quantity}kg)</strong>
+                                <p class="text-sm text-gray-500">Ngày: ${new Date(item.createdAt).toLocaleDateString('vi-VN')}</p>
+                            </div>
+                            <span class="font-bold ${statusColor}">${statusText}</span>
+                        `;
+                        listEl.appendChild(div);
+                    });
+                } catch (err) {
+                    loadingEl.textContent = 'Lỗi tải lịch sử đăng rác.';
+                }
+            }
+
+            // (Logic Update Profile (CRUD) giữ nguyên)
+            document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const name = document.getElementById('editName').value.trim();
+                const phone = document.getElementById('editPhone').value.trim();
+                const address = document.getElementById('editAddress').value.trim();
+                if (!name) { 
+                    showToast('Tên không được để trống!', false);
+                    return; 
+                }
+                try {
+                    const res = await fetch('http://localhost:3000/api/auth/profile', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ name, phone, address })
+                    });
+                    const data = await res.json();
+                    showToast(data.message, data.success);
+                    if (data.success) {
+                        loadProfile(); // Cập nhật lại header + form
+                    }
+                } catch (err) {
+                    showToast('Lỗi kết nối!', false);
+                }
+            });
+            
+            // (Logic Disable Account (CRUD) giữ nguyên)
+            const modal = document.getElementById('disableModal');
+            document.getElementById('disableAccountBtn').addEventListener('click', () => { modal.classList.remove('hidden'); });
+            document.getElementById('cancelDisable').addEventListener('click', () => { modal.classList.add('hidden'); });
+            document.getElementById('confirmDisable').addEventListener('click', async () => {
+                try {
+                    const res = await fetch('http://localhost:3000/api/auth/profile', {
+                        method: 'DELETE',
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    showToast(data.message, data.success);
+                    if (data.success) {
+                        localStorage.removeItem('token');
+                        setTimeout(() => window.location.href = '/index.html', 1500);
+                    }
+                } catch (err) {
+                    showToast('Lỗi kết nối!', false);
+                }
+                modal.classList.add('hidden');
+            });
+
+            // Tải tất cả dữ liệu khi vào trang
+            loadProfile();
+
+            // Ẩn/hiện Lịch sử dựa trên vai trò
+            if (userRole === 'household' || userRole === 'business') {
+                document.getElementById('historyContainer').style.display = 'grid'; 
+                loadRewardHistory(); 
+                loadWasteHistory();
+            }
+        }); // Hết DOMContentLoaded
+    </script>
+</body>
+</html>

@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Liên hệ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <header id="navbar-placeholder"></header>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">GREENCYCLE</a>
+            <button class="nav-toggle" id="navToggle">&#9776;</button>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item"><a href="/login.html" class="nav-link">Đăng nhập</a></li>
+                <li class="nav-item"><a href="/register.html" class="nav-link">Đăng ký</a></li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Tìm kiếm</a>
+                    <div class="dropdown">
+                        <a href="/search.html" class="dropdown-item">Tìm kiếm Chất thải</a>
+                        <a href="/map.html" class="dropdown-item">Bản đồ</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Thông tin</a>
+                    <div class="dropdown">
+                        <a href="/collection.html" class="dropdown-item">Điểm Thu Gom</a>
+                        <a href="/contact.html" class="dropdown-item">Liên hệ</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+    <section class="p-6 bg-white rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Liên hệ với chúng tôi</h2>
+        <p>Email: <a href="mailto:support@greencycle.com" class="text-green-600 hover:underline">support@greencycle.com</a></p>
+        <p>Hotline: <a href="tel:0909123456" class="text-green-600 hover:underline">0909-123-456</a></p>
+        <button id="contactBtn" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Gửi phản hồi</button>
+    </section>
+    <div id="contactPopup" class="hidden">
+        <div class="bg-white p-6 rounded-lg shadow-lg w-96">
+            <h3 class="text-xl font-semibold text-green-700 mb-4">Gửi phản hồi</h3>
+            <form id="feedbackForm" class="space-y-4">
+                <input type="text" name="name" placeholder="Tên" class="w-full" required>
+                <input type="email" name="email" placeholder="Email" class="w-full" required>
+                <textarea name="message" placeholder="Tin nhắn" class="w-full" rows="4" required></textarea>
+                <button type="submit" class="w-full">Gửi</button>
+            </form>
+            <button id="closePopup" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Đóng</button>
+        </div>
+    </div>
+    <footer id="footer-placeholder"></footer>
+
+    <script src="js/jwt-decode.min.js"></script> 
+    <script src="script.js"></script> 
+    <script src="js/navbar.js"></script> 
+    <script src="js/footer.js"></script> 
+    
+    <script src="script.js"></script>
+    <script>
+        document.getElementById('contactPopup').classList.add('fixed', 'inset-0', 'flex', 'items-center', 'justify-center');
+        document.getElementById('contactBtn').addEventListener('click', () => document.getElementById('contactPopup').classList.remove('hidden'));
+        document.getElementById('closePopup').addEventListener('click', () => document.getElementById('contactPopup').classList.add('hidden'));
+
+        document.getElementById('feedbackForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            fetch('http://localhost:3000/api/contact', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data),
+            })
+            .then(response => response.json())
+            .then(data => {
+                showToast(data.message, data.success);
+                if (data.success) e.target.reset();
+            })
+            .catch(error => showToast('Lỗi: ' + error.message, false))
+            .finally(() => document.getElementById('contactPopup').classList.add('hidden'));
+        });
+
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

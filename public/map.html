@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Bản đồ</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+</head>
+<body>
+    <header id="navbar-placeholder"></header>
+    <nav>
+        <div class="nav-container">
+            <a href="/" class="nav-logo">GREENCYCLE</a>
+            <button class="nav-toggle" id="navToggle">&#9776;</button>
+            <ul class="nav-menu" id="navMenu">
+                <li class="nav-item"><a href="/login.html" class="nav-link">Đăng nhập</a></li>
+                <li class="nav-item"><a href="/register.html" class="nav-link">Đăng ký</a></li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Tìm kiếm</a>
+                    <div class="dropdown">
+                        <a href="/search.html" class="dropdown-item">Tìm kiếm Chất thải</a>
+                        <a href="/map.html" class="dropdown-item">Bản đồ</a>
+                    </div>
+                </li>
+                <li class="nav-item">
+                    <a href="#" class="nav-link">Thông tin</a>
+                    <div class="dropdown">
+                        <a href="/collection.html" class="dropdown-item">Điểm Thu Gom</a>
+                        <a href="/contact.html" class="dropdown-item">Liên hệ</a>
+                    </div>
+                </li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="p-6 bg-white rounded-lg shadow-lg">
+        <h2 class="text-2xl font-semibold mb-4">Bản đồ Chất thải</h2>
+        <div id="map" class="w-full h-[60vh] rounded-lg border-2 border-green-600"></div>
+    </section>
+    
+    <footer id="footer-placeholder"></footer>
+    <script src="js/jwt-decode.min.js"></script> 
+    <script src="script.js"></script> 
+    <script src="js/navbar.js"></script> 
+    <script src="js/footer.js"></script> 
+    
+
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="script.js"></script>
+    <script>
+        // **XÓA showToast() VÀ initMap() (đã có trong script.js)**
+
+        const map = initMap('map', 21.0278, 105.8342); // Sử dụng hàm chung
+        const organicLayer = L.layerGroup().addTo(map);
+        const recycleLayer = L.layerGroup().addTo(map);
+
+        // **SỬA ĐƯỜNG DẪN API (thêm /auth)**
+        fetch('http://localhost:3000/api/auth/waste/search?q=')
+        .then(response => response.json())
+        .then(data => {
+            if (!Array.isArray(data)) return;
+            
+            data.forEach(waste => {
+                // Đảm bảo waste có lat và lng
+                if (waste.lat && waste.lng) {
+                    const layer = waste.type.toLowerCase().includes('hữu cơ') ? organicLayer : recycleLayer;
+                    L.marker([waste.lat, waste.lng], { 
+                        icon: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/447/447031.png', iconSize: [25, 41] })
+                    })
+                    .addTo(layer)
+                    .bindPopup(`<b>${waste.location}</b><br>${waste.type} - ${waste.quantity}kg`);
+                }
+            });
+        });
+
+        // (Phần còn lại của logic bản đồ giữ nguyên)
+        const baseLayers = { "Tất cả": L.layerGroup([organicLayer, recycleLayer]) };
+        const overlays = { "Rác hữu cơ": organicLayer, "Rác tái chế": recycleLayer };
+        L.control.layers(baseLayers, overlays).addTo(map);
+
+        if (navigator.geolocation) {
+            navigator.geolocation.getCurrentPosition(pos => {
+                const { latitude, longitude } = pos.coords;
+                L.marker([latitude, longitude], { icon: L.icon({ iconUrl: 'https://cdn-icons-png.flaticon.com/512/684/684908.png', iconSize: [25, 41] }) })
+                .addTo(map)
+                .bindPopup('Vị trí của bạn!')
+                .openPopup();
+                map.setView([latitude, longitude], 13);
+            }, () => showToast('Không thể lấy vị trí!', false)); // Sử dụng hàm chung
+        }
+
+        const navToggle = document.getElementById('navToggle');
+        const navMenu = document.getElementById('navMenu');
+        navToggle.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>

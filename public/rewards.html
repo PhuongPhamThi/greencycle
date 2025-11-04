@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Đổi Thưởng</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
+
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        /* CSS riêng của trang */
+        .reward-card {
+            /* Dùng class của Flowbite, không cần CSS riêng */
+        }
+        .reward-img {
+            height: 180px;
+            width: 100%;
+            object-fit: cover;
+            border-bottom: 1px solid #e5e7eb; /* gray-200 */
+        }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+    <header id="navbar-placeholder"></header>
+
+    <main class="content" style="max-width: 7xl; margin: 0 auto; padding: 2rem;">
+        
+        <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 mb-8">
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-center">
+                <div>
+                    <h1 class="text-3xl font-bold text-gray-900 dark:text-white">Cửa hàng Đổi thưởng</h1>
+                    <p class="text-lg text-gray-600 dark:text-gray-400 mt-1">Dùng "Điểm Xanh" của bạn để đổi lấy những phần quà ý nghĩa!</p>
+                </div>
+                <div class="text-left md:text-right mt-4 md:mt-0">
+                    <span class="text-sm font-medium text-gray-500 dark:text-gray-400">Điểm của bạn</span>
+                    <p id="userPoints" class="text-4xl font-bold text-yellow-500">...</p>
+                </div>
+            </div>
+        </div>
+
+        <div id="rewardsList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p id="loadingText" class="text-gray-500 dark:text-gray-400">Đang tải danh sách phần thưởng...</p>
+        </div>
+
+    </main>
+
+    <footer id="footer-placeholder"></footer>
+
+    <script src="js/jwt-decode.min.js"></script> 
+    <script src="script.js"></script> 
+    <script src="js/navbar.js"></script> 
+    <script src="js/footer.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Vui lòng đăng nhập để xem phần thưởng!', false);
+                setTimeout(() => window.location.href = '/login.html', 1000);
+                return;
+            }
+
+            const rewardsListEl = document.getElementById('rewardsList');
+            const userPointsEl = document.getElementById('userPoints');
+            const loadingTextEl = document.getElementById('loadingText');
+
+            let currentUserPoints = 0; // Lưu điểm hiện tại
+
+            // Tải điểm của người dùng
+            async function loadUserPoints() {
+                try {
+                    const res = await fetch('http://localhost:3000/api/auth/points', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    if (data.success) {
+                        currentUserPoints = data.points;
+                        userPointsEl.textContent = currentUserPoints;
+                    } else {
+                        userPointsEl.textContent = 'Lỗi';
+                        showToast(data.message, false);
+                    }
+                } catch (err) {
+                    showToast('Lỗi kết nối!', false);
+                }
+            }
+
+            // Tải danh sách phần thưởng
+            async function loadRewards() {
+                try {
+                    const res = await fetch('http://localhost:3000/api/rewards', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (!res.ok) {
+                        throw new Error('Không thể tải phần thưởng. API có thể bị thiếu.');
+                    }
+                    
+                    const rewards = await res.json();
+
+                    if (!Array.isArray(rewards)) {
+                         loadingTextEl.textContent = 'Không có phần thưởng nào.';
+                         return;
+                    }
+                    
+                    loadingTextEl.style.display = 'none'; // Ẩn text "Đang tải"
+                    rewardsListEl.innerHTML = ''; // Xóa danh sách
+
+                    rewards.forEach(reward => {
+                        const canRedeem = currentUserPoints >= reward.pointsNeeded;
+                        const card = document.createElement('div');
+                        // Dùng card của Flowbite
+                        card.className = 'w-full bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700';
+                        card.innerHTML = `
+                            <img class="rounded-t-lg reward-img" src="${reward.imageUrl}" alt="${reward.name}" />
+                            <div class="p-5">
+                                <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">${reward.name}</h5>
+                                <p class="mb-3 font-normal text-gray-700 dark:text-gray-400">${reward.description}</p>
+                                <div class="flex justify-between items-center">
+                                    <span class="text-xl font-bold text-yellow-500">${reward.pointsNeeded} Điểm</span>
+                                    <button 
+                                        type="button"
+                                        class="redeem-btn inline-flex items-center px-4 py-2 text-sm font-medium text-center text-white rounded-lg ${canRedeem ? 'bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800' : 'bg-gray-400 cursor-not-allowed dark:bg-gray-600'}" 
+                                        data-id="${reward.id}" 
+                                        data-points="${reward.pointsNeeded}"
+                                        ${canRedeem ? '' : 'disabled'}>
+                                        ${canRedeem ? 'Đổi ngay' : 'Không đủ điểm'}
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        rewardsListEl.appendChild(card);
+                    });
+
+                    // Gắn sự kiện cho các nút "Đổi ngay"
+                    document.querySelectorAll('.redeem-btn').forEach(button => {
+                        button.addEventListener('click', handleRedeem);
+                    });
+
+                } catch (err) {
+                    loadingTextEl.textContent = 'Lỗi tải phần thưởng.';
+                    showToast(err.message, false);
+                }
+            }
+
+            // Xử lý khi nhấn nút "Đổi ngay"
+            async function handleRedeem(event) {
+                const button = event.currentTarget;
+                const rewardId = button.dataset.id;
+                const pointsNeeded = parseInt(button.dataset.points, 10);
+
+                if (currentUserPoints < pointsNeeded) {
+                    showToast('Bạn không đủ điểm!', false);
+                    return;
+                }
+
+                if (!confirm(`Bạn có chắc chắn muốn dùng ${pointsNeeded} điểm để đổi "${rewardId}" không?`)) {
+                    return;
+                }
+
+                button.disabled = true;
+                button.textContent = 'Đang xử lý...';
+
+                try {
+                    const res = await fetch('http://localhost:3000/api/rewards/redeem', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': `Bearer ${token}`
+                        },
+                        body: JSON.stringify({ rewardId: rewardId })
+                    });
+                    const data = await res.json();
+                    
+                    showToast(data.message, data.success);
+
+                    if (data.success) {
+                        // Tải lại cả điểm và danh sách phần thưởng
+                        await loadUserPoints();
+                        await loadRewards();
+                    } else {
+                        button.disabled = false;
+                        button.textContent = 'Đổi ngay';
+                    }
+
+                } catch (err) {
+                    showToast('Lỗi kết nối!', false);
+                    button.disabled = false;
+                    button.textContent = 'Đổi ngay';
+                }
+            }
+
+            // Chạy khi tải trang
+            async function init() {
+                await loadUserPoints();
+                await loadRewards();
+            }
+            init();
+
+        });
+    </script>
+</body>
+</html>

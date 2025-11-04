@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Tìm kiếm</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+    
+    <header id="navbar-placeholder"></header>
+
+    <main class="content" style="max-width: 7xl; margin: 0 auto; padding: 2rem;">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            
+            <div class="md:col-span-1 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 h-fit">
+                <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Tìm kiếm Rác (Bên Mua)</h2>
+                <form id="searchForm" class="space-y-4">
+                    <div>
+                        <label for="query" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Từ khóa (Địa điểm, Loại)</label>
+                        <input type="text" name="query" id="query" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="ví dụ: Cầu Giấy, vỏ trái cây..." required>
+                    </div>
+                    <div>
+                        <label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Loại rác</label>
+                        <select name="type" id="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white">
+                            <option value="">Tất cả loại</option>
+                            <option value="hữu cơ">Rác hữu cơ</option>
+                            <option value="tái chế">Rác tái chế</option>
+                            </select>
+                    </div>
+                    <button type="submit" class="w-full text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        <i class="fas fa-search mr-2"></i>Tìm kiếm
+                    </button>
+                </form>
+            </div>
+            
+            <div class="md:col-span-2 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-xl mb-4 font-semibold text-gray-900 dark:text-white">Kết quả Tìm kiếm (Các rác đang chờ)</h3>
+                <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <p class="text-gray-500 dark:text-gray-400">Vui lòng nhập từ khóa để tìm kiếm...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+    
+    <footer id="footer-placeholder"></footer>
+
+    <div id="detailModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
+        <div class="relative p-4 w-full max-w-lg h-full md:h-auto">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Chi tiết Bài đăng Rác thải
+                    </h3>
+                    <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="detailModal">
+                        <i class="fas fa-times"></i>
+                        <span class="sr-only">Đóng</span>
+                    </button>
+                </div>
+                <div class="p-4 md:p-5 space-y-4">
+                    <h4 id="modalWasteType" class="text-2xl font-bold text-green-600 dark:text-green-400"></h4>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+                        <strong class="text-gray-900 dark:text-white">Khối lượng:</strong>
+                        <span id="modalWasteQuantity"></span> kg
+                    </p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+                        <strong class="text-gray-900 dark:text-white">Địa chỉ:</strong>
+                        <span id="modalWasteLocation"></span>
+                    </p>
+                    <hr class="dark:border-gray-600">
+                    <h5 class="text-lg font-semibold text-gray-900 dark:text-white">Thông tin Chủ sở hữu (Bên Bán)</h5>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+                        <strong class="text-gray-900 dark:text-white">Tên:</strong>
+                        <span id="modalOwnerName"></span>
+                    </p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+                        <strong class="text-gray-900 dark:text-white">Email:</strong>
+                        <span id="modalOwnerEmail"></span>
+                    </p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
+                        <strong class="text-gray-900 dark:text-white">SĐT:</strong>
+                        <span id="modalOwnerPhone"></span>
+                    </p>
+                </div>
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button id="modalClaimButton" type="button" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Nhận Thu Gom
+                    </button>
+                    <button data-modal-hide="detailModal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="js/jwt-decode.min.js"></script> 
+    <script src="script.js"></script> 
+    <script src="js/navbar.js"></script> 
+    <script src="js/footer.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const resultsDiv = document.getElementById('searchResults');
+            const searchForm = document.getElementById('searchForm');
+            const token = localStorage.getItem('token');
+
+            // Lấy các phần tử của Modal
+            const modalElement = document.getElementById('detailModal');
+            const modal = new Flowbite.Modal(modalElement);
+            
+            const modalWasteType = document.getElementById('modalWasteType');
+            const modalWasteQuantity = document.getElementById('modalWasteQuantity');
+            const modalWasteLocation = document.getElementById('modalWasteLocation');
+            const modalOwnerName = document.getElementById('modalOwnerName');
+            const modalOwnerEmail = document.getElementById('modalOwnerEmail');
+            const modalOwnerPhone = document.getElementById('modalOwnerPhone');
+            const modalClaimButton = document.getElementById('modalClaimButton');
+            
+            searchForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                
+                if (!token) {
+                    showToast('Vui lòng đăng nhập với tài khoản "Bên Mua" (Recycler) để tìm kiếm!', false);
+                    return;
+                }
+
+                const query = e.target.query.value.toLowerCase();
+                const type = e.target.type.value.toLowerCase();
+                
+                try {
+                    // API này đã được nâng cấp (thêm /auth)
+                    const res = await fetch(`http://localhost:3000/api/auth/waste/search?q=${encodeURIComponent(query)}&status=pending`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    
+                    if (res.status === 403) {
+                        showToast('Bạn không có quyền tìm kiếm!', false);
+                        resultsDiv.innerHTML = '<p class="text-red-600 dark:text-red-400">Bạn không có quyền truy cập tính năng này.</p>';
+                        return;
+                    }
+                    
+                    const data = await res.json();
+                    resultsDiv.innerHTML = ''; 
+                    
+                    // Lọc (đã có)
+                    const filteredData = data.filter(waste => 
+                        (!type || waste.type.toLowerCase().includes(type)) &&
+                        (waste.location.toLowerCase().includes(query) || waste.type.toLowerCase().includes(query))
+                    );
+                    
+                    if (filteredData.length === 0) {
+                         resultsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Không tìm thấy kết quả "đang chờ" nào!</p>';
+                         return;
+                    }
+                    
+                    filteredData.forEach(waste => {
+                        // **SỬA: CARD MỚI (Dùng Flowbite)**
+                        const card = document.createElement('div');
+                        card.className = "w-full p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700";
+                        card.innerHTML = `
+                            <h5 class="mb-1 text-xl font-bold tracking-tight text-gray-900 dark:text-white">${waste.type} (${waste.quantity}kg)</h5>
+                            <p class="mb-2 font-normal text-gray-700 dark:text-gray-400">${waste.location}</p>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Đăng bởi: ${waste.ownerName}</p>
+                            
+                            <button type="button" 
+                                    class="view-details-btn mt-3 inline-flex items-center px-3 py-2 text-sm font-medium text-center text-white bg-blue-700 rounded-lg hover:bg-blue-800 focus:ring-4 focus:ring-blue-300 dark:bg-blue-600 dark:hover:bg-blue-700 dark:focus:ring-blue-800"
+                                    data-id="${waste.id}">
+                                Xem Chi tiết
+                            </button>
+                        `;
+                        resultsDiv.appendChild(card);
+
+                        // Gắn sự kiện click cho nút "Xem Chi tiết"
+                        card.querySelector('.view-details-btn').addEventListener('click', () => {
+                            showDetails(waste); // Truyền toàn bộ object 'waste'
+                        });
+                    });
+
+                } catch (error) {
+                    showToast('Lỗi: ' + error.message, false);
+                }
+            });
+
+            // **HÀM MỚI: Hiển thị chi tiết trong Modal**
+            function showDetails(waste) {
+                // 1. Điền dữ liệu vào Modal
+                modalWasteType.textContent = waste.type;
+                modalWasteQuantity.textContent = waste.quantity;
+                modalWasteLocation.textContent = waste.location;
+                modalOwnerName.textContent = waste.ownerName;
+                modalOwnerEmail.textContent = waste.ownerEmail;
+                modalOwnerPhone.textContent = waste.ownerPhone || "Chưa cập nhật";
+                
+                // 2. Gắn ID vào nút "Nhận Thu Gom" trong modal
+                modalClaimButton.dataset.id = waste.id;
+                
+                // 3. Mở modal
+                modal.show();
+            }
+
+            // **HÀM CŨ: (Sửa lại để lắng nghe nút trong Modal)**
+            modalClaimButton.addEventListener('click', handleClaimWaste);
+            
+            async function handleClaimWaste(event) {
+                const wasteId = event.currentTarget.dataset.id;
+                
+                if (!confirm('Bạn có chắc chắn muốn nhận thu gom mục rác này không?')) return;
+                
+                const button = event.currentTarget;
+                button.disabled = true;
+                button.textContent = 'Đang xử lý...';
+
+                try {
+                    const res = await fetch('http://localhost:3000/api/auth/collection/claim', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ wasteId: wasteId })
+                    });
+                    const data = await res.json();
+                    
+                    showToast(data.message, data.success);
+                    
+                    if (data.success) {
+                        modal.hide(); // Ẩn modal
+                        searchForm.dispatchEvent(new Event('submit')); // Tải lại kết quả
+                    }
+                    
+                    button.disabled = false;
+                    button.textContent = 'Nhận Thu Gom';
+
+                } catch (err) {
+                    showToast('Lỗi kết nối: ' + err.message, false);
+                    button.disabled = false;
+                    button.textContent = 'Nhận Thu Gom';
+                }
+            }
+        });
+    </script>
+</body>
+</html>

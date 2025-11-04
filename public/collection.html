@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Điểm Thu Gom</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
+
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+    <header id="navbar-placeholder"></header>
+
+    <main class="content" style="max-width: 7xl; margin: 0 auto; padding: 2rem;">
+        <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Điểm Thu Gom Cố định</h1>
+        <p class="mb-8 text-lg text-gray-600 dark:text-gray-400">Đây là danh sách các điểm thu gom chính thức do Admin quản lý.</p>
+        
+        <div id="collectionList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <p class="text-gray-500 dark:text-gray-400">Đang tải danh sách điểm thu gom...</p>
+        </div>
+    </main>
+    
+    <footer id="footer-placeholder"></footer>
+
+    <script src="js/jwt-decode.min.js"></script> 
+    <script src="script.js"></script> <script src="js/navbar.js"></script> 
+    <script src="js/footer.js"></script> 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const pointsDiv = document.getElementById('collectionList');
+            let allPointsData = [];
+
+            // XÓA: Khai báo các biến modal
+            
+            // Tải dữ liệu động từ API
+            (async function loadPoints() {
+                try {
+                    const res = await fetch('/api/collection-points');
+                    if (!res.ok) throw new Error('Không thể tải dữ liệu');
+                    
+                    allPointsData = await res.json(); 
+                    
+                    pointsDiv.innerHTML = ''; 
+
+                    if (allPointsData.length === 0) {
+                        pointsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Chưa có điểm thu gom nào được Admin cập nhật.</p>';
+                        return;
+                    }
+
+                    allPointsData.forEach(point => {
+                        const card = document.createElement('div');
+                        card.className = "block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700";
+                        // XÓA: Các thuộc tính data-modal
+                        
+                        card.dataset.id = point.id; 
+                        
+                        card.innerHTML = `
+                            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                                <i class="fas fa-map-pin mr-2 text-green-500"></i>
+                                ${point.name}
+                            </h5>
+                            <p class="font-normal text-gray-700 dark:text-gray-400">${point.address}</p>
+                        `;
+                        
+                        // XÓA: Sự kiện click
+                        
+                        pointsDiv.appendChild(card);
+                    });
+
+                } catch (err) {
+                    pointsDiv.innerHTML = `<p class="text-red-500">Lỗi: ${err.message}</p>`;
+                }
+            })();
+
+            // XÓA: Hàm displayPointDetails()
+        });
+    </script>
+</body>
+</html>

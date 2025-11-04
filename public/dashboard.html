@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GREENCYCLE - Dashboard</title>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
+
+    <style> body { font-family: 'Inter', sans-serif; } </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+    <header id="navbar-placeholder"></header>
+
+    <main class="content" style="max-width: 7xl; margin: 0 auto; padding: 2rem;">
+        <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Dashboard</h1>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            
+            <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Chào mừng, <span id="userName" class="text-green-500">...</span></h2>
+                <p class="text-lg text-gray-700 dark:text-gray-400">
+                    Điểm xanh của bạn: <span id="points" class="font-bold text-yellow-500">0</span>
+                </p>
+                
+                <h3 class="text-lg font-semibold mt-6 mb-4 text-gray-900 dark:text-white">Đăng tải Chất thải Mới</h3>
+                
+                <form id="postForm" class="space-y-4">
+                    <div>
+                        <label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Loại chất thải</label>
+                        <input type="text" name="type" id="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Vỏ trái cây, rau hỏng..." required>
+                    </div>
+                    <div>
+                        <label for="quantity" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Khối lượng (kg)</label>
+                        <input type="number" name="quantity" id="quantity" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Ví dụ: 2.5" step="0.1" required>
+                    </div>
+                    <div>
+                        <label for="locationName" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mô tả vị trí</label>
+                        <input type="text" name="locationName" id="locationName" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="Ví dụ: Nhà tôi, 123 ABC" required>
+                    </div>
+                    
+                    <input type="hidden" name="lat" id="lat">
+                    <input type="hidden" name="lng" id="lng">
+
+                    <button type="button" id="getLocationBtn" class="w-full text-gray-900 bg-yellow-400 hover:bg-yellow-500 focus:ring-4 focus:outline-none focus:ring-yellow-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:focus:ring-yellow-900">
+                        <i class="fas fa-map-marker-alt mr-2"></i> Lấy vị trí hiện tại
+                    </button>
+                    
+                    <button type="submit" class="w-full text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                        Đăng tải
+                    </button>
+                </form>
+            </div>
+
+            <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+                <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Trạng thái Rác của bạn</h3>
+                
+                <ul id="wasteList" class="space-y-3 max-h-64 overflow-y-auto pr-2">
+                    <p class="text-gray-500 dark:text-gray-400">Đang tải danh sách...</p>
+                </ul>
+
+                <h3 class="text-lg font-semibold mt-6 mb-4 text-gray-900 dark:text-white">Trạng thái Thu gom</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Rác bạn đăng sẽ tự động hiển thị cho "Bên Mua". Họ sẽ là người chấp nhận thu gom.</p>
+                
+                </div>
+        </div>
+    </main>
+
+    <footer id="footer-placeholder"></footer>
+
+    <script src="js/jwt-decode.min.js"></script>
+    <script src="script.js"></script> 
+    <script src="js/navbar.js"></script> 
+    <script src="js/footer.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => { // Bọc trong DOMContentLoaded
+            
+            // XÓA: navToggle, navLogout, showToast (đã có trong file chung)
+            
+            let token = localStorage.getItem('token');
+            if (!token) {
+                showToast('Vui lòng đăng nhập để tiếp tục!', false);
+                setTimeout(() => window.location.href = '/login.html', 1000);
+                return;
+            }
+
+            const decoded = jwt_decode(token);
+            const userId = decoded.userId;
+            const userName = decoded.name || 'User';
+            document.getElementById('userName').textContent = userName;
+
+            // Fetch Lấy điểm xanh
+            fetch('http://localhost:3000/api/auth/points', {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (data.success) document.getElementById('points').textContent = data.points;
+                    else showToast(data.message, false);
+                })
+                .catch(err => showToast('Lỗi: ' + err.message, false));
+
+            // Fetch Lấy danh sách chất thải
+            fetch(`http://localhost:3000/api/auth/waste/${userId}`, {
+                headers: { Authorization: `Bearer ${token}` },
+            })
+                .then(res => res.json())
+                .then(data => {
+                    if (Array.isArray(data)) {
+                        const list = document.getElementById('wasteList');
+                        list.innerHTML = ''; // Xóa chữ "Đang tải..."
+                        
+                        if (data.length === 0) {
+                             list.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Bạn chưa đăng tải mục rác nào.</p>';
+                             return;
+                        }
+
+                        data.forEach(waste => {
+                            const li = document.createElement('li');
+                            li.className = 'p-3 bg-gray-50 rounded-lg dark:bg-gray-700 flex justify-between items-center';
+                            
+                            let statusText = 'Đang chờ';
+                            let statusColor = 'text-yellow-600 dark:text-yellow-400';
+                            if (waste.status === 'collected' || waste.status === 'in_progress') {
+                                statusText = 'Đã có người nhận';
+                                statusColor = 'text-green-600 dark:text-green-400';
+                            }
+                            
+                            li.innerHTML = `
+                                <div>
+                                    <span class="text-gray-900 dark:text-white">${waste.location} (${waste.quantity}kg ${waste.type})</span>
+                                </div>
+                                <span class="font-bold ${statusColor}">${statusText}</span>
+                            `;
+                            list.appendChild(li);
+                        });
+                        
+                    } else if (data.success === false) {
+                        showToast(data.message, false);
+                    }
+                })
+                .catch(err => showToast('Lỗi: ' + err.message, false));
+            
+            // Logic Lấy vị trí (Giữ nguyên)
+            document.getElementById('getLocationBtn').addEventListener('click', () => {
+                if (!navigator.geolocation) {
+                    showToast('Trình duyệt của bạn không hỗ trợ lấy vị trí!', false);
+                    return;
+                }
+                navigator.geolocation.getCurrentPosition(
+                    (position) => {
+                        const lat = position.coords.latitude;
+                        const lng = position.coords.longitude;
+                        document.getElementById('lat').value = lat;
+                        document.getElementById('lng').value = lng;
+                        document.getElementById('locationName').value = `Vị trí: ${lat.toFixed(4)}, ${lng.toFixed(4)}`;
+                        showToast('Đã lấy vị trí thành công!', true);
+                    },
+                    () => {
+                        showToast('Không thể lấy vị trí. Vui lòng cho phép truy cập.', false);
+                    }
+                );
+            });
+
+            // Logic Đăng tải rác (Giữ nguyên)
+            document.getElementById('postForm').addEventListener('submit', (e) => {
+                e.preventDefault();
+                const lat = document.getElementById('lat').value;
+                if (!lat) {
+                    showToast('Vui lòng nhấn nút "Lấy vị trí hiện tại"!', false);
+                    return;
+                }
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+                
+                fetch('http://localhost:3000/api/auth/waste/post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify(data),
+                })
+                .then(res => res.json())
+                .then(data => {
+                    showToast(data.message, data.success);
+                    if (data.success) {
+                        e.target.reset();
+                        setTimeout(() => location.reload(), 1000);
+                    }
+                })
+                .catch(err => showToast('Lỗi: ' + err.message, false));
+            });
+            
+            // XÓA: Toàn bộ 'collectBtn.addEventListener'
+            
+        }); // Hết DOMContentLoaded
+    </script>
+</body>
+</html>
