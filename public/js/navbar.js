@@ -38,7 +38,6 @@ function buildNavbar() {
 
             if (role === 'admin') {
                 roleSpecificLinks = `
-                    <li class="nav-item"><a href="/admin.html" class="nav-link" style="background-color: #f59e0b; color: #000; border-radius: 5px;">Admin</a></li>
                     <li class="nav-item"><a href="/dashboard.html" class="nav-link">Dashboard</a></li>
                     <li class="nav-item"><a href="/rewards.html" class="nav-link">Đổi thưởng</a></li>
                     <li class="nav-item"><a href="/search.html" class="nav-link">Tìm kiếm</a></li>
