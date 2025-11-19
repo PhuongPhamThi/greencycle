@@ -1,3 +1,4 @@
+
 function buildNavbar() {
     const placeholder = document.getElementById('navbar-placeholder');
     if (!placeholder) {
@@ -94,7 +95,7 @@ function buildNavbar() {
         <nav>
             <div class="nav-container">
                 <a href="/" class="nav-logo flex items-center">
-                    <img src="logo.jpg" alt="Logo" class="h-10 w-auto mr-2" onerror="this.style.display='none'">
+                    <img src="assets/images/image_bc7070.png" alt="Logo" class="h-10 w-auto mr-2" onerror="this.style.display='none'">
                     <span>GREENCYCLE</span>
                 </a>
 
