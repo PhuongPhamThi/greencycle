@@ -6,10 +6,7 @@
     <title>GREENCYCLE - Điểm Thu Gom</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-    
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
 
@@ -21,7 +18,7 @@
 
     <main class="content" style="max-width: 7xl; margin: 0 auto; padding: 2rem;">
         <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Điểm Thu Gom Cố định</h1>
-        <p class="mb-8 text-lg text-gray-600 dark:text-gray-400">Đây là danh sách các điểm thu gom chính thức do Admin quản lý.</p>
+        <p class="mb-8 text-lg text-gray-600 dark:text-gray-400">Đây là danh sách các điểm thu gom chính thức. Nhấp vào một điểm để xem thông tin chi tiết.</p>
         
         <div id="collectionList" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             <p class="text-gray-500 dark:text-gray-400">Đang tải danh sách điểm thu gom...</p>
@@ -30,47 +27,135 @@
     
     <footer id="footer-placeholder"></footer>
 
+    <div id="manualModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50">
+        <div class="relative p-4 w-full max-w-lg max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
+                        Thông tin Chi tiết
+                    </h3>
+                    <button type="button" onclick="closeModal()" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                
+                <div class="p-4 md:p-5 space-y-4">
+                    <img id="modalImage" src="" alt="Hình ảnh" class="mb-4 w-full h-48 object-cover rounded-lg hidden">
+                    
+                    <h4 id="modalName" class="text-2xl font-bold text-green-600"></h4>
+                    
+                    <p class="text-base text-gray-700 dark:text-gray-300">
+                        <strong class="block text-gray-900 dark:text-white"><i class="fas fa-map-marker-alt mr-2"></i>Địa chỉ:</strong>
+                        <span id="modalAddress">...</span>
+                    </p>
+                    <p class="text-base text-gray-700 dark:text-gray-300">
+                        <strong class="block text-gray-900 dark:text-white"><i class="fas fa-clock mr-2"></i>Giờ hoạt động:</strong>
+                        <span id="modalHours">...</span>
+                    </p>
+                    <p class="text-base text-gray-700 dark:text-gray-300">
+                        <strong class="block text-gray-900 dark:text-white"><i class="fas fa-recycle mr-2"></i>Chấp nhận:</strong>
+                        <span id="modalAccepted">...</span>
+                    </p>
+                    <p class="text-base text-gray-700 dark:text-gray-300">
+                        <strong class="block text-gray-900 dark:text-white"><i class="fas fa-phone mr-2"></i>Liên hệ:</strong>
+                        <span id="modalPhone">...</span>
+                    </p>
+                </div>
+
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
+                    <button onclick="closeModal()" type="button" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center w-full">
+                        Đóng
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/jwt-decode.min.js"></script> 
-    <script src="script.js"></script> <script src="js/navbar.js"></script> 
+    <script src="script.js"></script> 
+    <script src="js/navbar.js"></script> 
     <script src="js/footer.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
     
     <script>
+        // Biến toàn cục để lưu dữ liệu
+        let allPointsData = [];
+        const modalElement = document.getElementById('manualModal');
+
+        // Hàm mở Modal (Thuần JS)
+        function openModal() {
+            modalElement.classList.remove('hidden');
+            modalElement.classList.add('flex');
+        }
+
+        // Hàm đóng Modal (Thuần JS)
+        function closeModal() {
+            modalElement.classList.add('hidden');
+            modalElement.classList.remove('flex');
+        }
+
+        // Hàm hiển thị chi tiết
+        function showDetails(pointId) {
+            const point = allPointsData.find(p => p.id === pointId);
+            if (!point) return;
+
+            // Điền thông tin
+            document.getElementById('modalName').textContent = point.name;
+            document.getElementById('modalAddress').textContent = point.address;
+            
+            // Xử lý an toàn cho các trường có thể thiếu
+            const hoursText = point.hours ? (point.hours.time || point.hours) : 'Chưa cập nhật';
+            document.getElementById('modalHours').textContent = hoursText;
+            
+            document.getElementById('modalAccepted').textContent = point.accepted || 'Chưa cập nhật';
+            document.getElementById('modalPhone').textContent = point.phone || 'Chưa cập nhật';
+            
+            // Ảnh
+            const imgEl = document.getElementById('modalImage');
+            if (point.imageUrl) {
+                imgEl.src = point.imageUrl;
+                imgEl.classList.remove('hidden');
+            } else {
+                imgEl.classList.add('hidden');
+            }
+
+            // Mở modal
+            openModal();
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const pointsDiv = document.getElementById('collectionList');
-            let allPointsData = [];
-
-            // XÓA: Khai báo các biến modal
             
-            // Tải dữ liệu động từ API
+            // Tải dữ liệu
             (async function loadPoints() {
                 try {
                     const res = await fetch('/api/collection-points');
-                    if (!res.ok) throw new Error('Không thể tải dữ liệu');
+                    if (!res.ok) throw new Error('Lỗi tải dữ liệu');
                     
                     allPointsData = await res.json(); 
-                    
                     pointsDiv.innerHTML = ''; 
 
                     if (allPointsData.length === 0) {
-                        pointsDiv.innerHTML = '<p class="text-gray-500 dark:text-gray-400">Chưa có điểm thu gom nào được Admin cập nhật.</p>';
+                        pointsDiv.innerHTML = '<p class="text-gray-500">Chưa có điểm thu gom nào.</p>';
                         return;
                     }
 
                     allPointsData.forEach(point => {
                         const card = document.createElement('div');
-                        card.className = "block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700";
-                        
-                        card.dataset.id = point.id; 
+                        card.className = "block p-6 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-100 cursor-pointer transition-transform hover:-translate-y-1";
                         
                         card.innerHTML = `
-                            <h5 class="mb-2 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">
+                            <h5 class="mb-2 text-2xl font-bold text-gray-900 dark:text-white">
                                 <i class="fas fa-map-pin mr-2 text-green-500"></i>
                                 ${point.name}
                             </h5>
-                            <p class="font-normal text-gray-700 dark:text-gray-400">${point.address}</p>
+                            <p class="font-normal text-gray-700 mb-4">${point.address}</p>
+                            <span class="text-sm text-blue-600 font-medium">Nhấp để xem chi tiết</span>
                         `;
                         
+                        // Gắn sự kiện Click trực tiếp
+                        card.onclick = () => showDetails(point.id);
                         
                         pointsDiv.appendChild(card);
                     });

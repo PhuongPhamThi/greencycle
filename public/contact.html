@@ -4,48 +4,128 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GREENCYCLE - Liên hệ</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
+
+    <style> body { font-family: 'Inter', sans-serif; } </style>
 </head>
-<body>
+<body class="bg-gray-100 dark:bg-gray-900 flex flex-col min-h-screen">
+    
     <header id="navbar-placeholder"></header>
 
-    <section class="p-6 bg-white rounded-lg shadow-lg">
-        <h2 class="text-2xl font-semibold mb-4">Liên hệ với chúng tôi</h2>
-        <p>Email: <a href="mailto:support@greencycle.com" class="text-green-600 hover:underline">support@greencycle.com</a></p>
-        <p>Hotline: <a href="tel:0909123456" class="text-green-600 hover:underline">0909-123-456</a></p>
-        <button id="contactBtn" class="mt-4 bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700">Gửi phản hồi</button>
-    </section>
-    <div id="contactPopup" class="hidden">
-        <div class="bg-white p-6 rounded-lg shadow-lg w-96">
-            <h3 class="text-xl font-semibold text-green-700 mb-4">Gửi phản hồi</h3>
-            <form id="feedbackForm" class="space-y-4">
-                <input type="text" name="name" placeholder="Tên" class="w-full" required>
-                <input type="email" name="email" placeholder="Email" class="w-full" required>
-                <textarea name="message" placeholder="Tin nhắn" class="w-full" rows="4" required></textarea>
-                <button type="submit" class="w-full">Gửi</button>
-            </form>
-            <button id="closePopup" class="mt-4 bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Đóng</button>
+    <main class="content flex-grow" style="max-width: 7xl; margin: 0 auto; padding: 2rem; width: 100%;">
+        <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Liên hệ & Hỗ trợ</h1>
+        
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-8">
+            
+            <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 h-fit">
+                <h2 class="text-2xl font-bold mb-4 text-green-700 dark:text-green-500">Thông tin liên hệ</h2>
+                <p class="mb-4 text-gray-600 dark:text-gray-300">
+                    Nếu bạn có bất kỳ câu hỏi, góp ý hoặc cần hỗ trợ, vui lòng liên hệ với chúng tôi qua các kênh dưới đây.
+                </p>
+                
+                <div class="space-y-4">
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Email</p>
+                            <a href="mailto:support@greencycle.com" class="text-base font-medium text-gray-900 dark:text-white hover:text-green-600">support@greencycle.com</a>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                            <i class="fas fa-phone-alt"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Hotline</p>
+                            <a href="tel:0909123456" class="text-base font-medium text-gray-900 dark:text-white hover:text-green-600">0909-123-456</a>
+                        </div>
+                    </div>
+                    
+                    <div class="flex items-center">
+                        <div class="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 mr-3">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm text-gray-500 dark:text-gray-400">Địa chỉ</p>
+                            <p class="text-base font-medium text-gray-900 dark:text-white">Trường Đại học Mỏ - Địa chất, Hà Nội</p>
+                        </div>
+                    </div>
+                </div>
+
+                <button data-modal-target="contactModal" data-modal-toggle="contactModal" class="mt-8 w-full text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
+                    <i class="fas fa-paper-plane mr-2"></i> Gửi phản hồi cho chúng tôi
+                </button>
+            </div>
+
+            <div class="hidden md:block rounded-lg overflow-hidden shadow-lg">
+                <img src="https://images.unsplash.com/photo-1532996122724-e3c354a0b15b?auto=format&fit=crop&w=800&q=80" alt="Contact Us" class="w-full h-full object-cover">
+            </div>
         </div>
-    </div>
+    </main>
+    
     <footer id="footer-placeholder"></footer>
 
+    <div id="contactModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
+        <div class="relative p-4 w-full max-w-md h-full md:h-auto">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white" data-modal-hide="contactModal">
+                    <i class="fas fa-times"></i>
+                    <span class="sr-only">Đóng</span>
+                </button>
+                <div class="p-6 text-center">
+                    <h3 class="mb-5 text-xl font-normal text-gray-900 dark:text-white">Gửi phản hồi tới Greencycle</h3>
+                    
+                    <form id="feedbackForm" class="space-y-4 text-left">
+                        <div>
+                            <label for="name" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tên của bạn</label>
+                            <input type="text" name="name" id="name" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label for="email" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Email liên hệ</label>
+                            <input type="email" name="email" id="email" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" required>
+                        </div>
+                        <div>
+                            <label for="message" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Tin nhắn</label>
+                            <textarea name="message" id="message" rows="4" class="block p-2.5 w-full text-sm text-gray-900 bg-gray-50 rounded-lg border border-gray-300 focus:ring-green-500 focus:border-green-500 dark:bg-gray-600 dark:border-gray-500 dark:placeholder-gray-400 dark:text-white" placeholder="Nội dung phản hồi..." required></textarea>
+                        </div>
+                        <button type="submit" class="w-full text-white bg-green-600 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 dark:focus:ring-green-800 font-medium rounded-lg text-sm inline-flex items-center justify-center px-5 py-2.5 text-center">
+                            Gửi ngay
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <script src="js/jwt-decode.min.js"></script> 
-    <script src="script.js"></script> <script src="js/navbar.js"></script> 
-    <script src="js/footer.js"></script> 
+    <script src="script.js"></script> <script src="js/navbar.js"></script> <script src="js/footer.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
     
-    <script src="script.js"></script>
     <script>
-        document.getElementById('contactPopup').classList.add('fixed', 'inset-0', 'flex', 'items-center', 'justify-center');
-        document.getElementById('contactBtn').addEventListener('click', () => document.getElementById('contactPopup').classList.remove('hidden'));
-        document.getElementById('closePopup').addEventListener('click', () => document.getElementById('contactPopup').classList.add('hidden'));
-
+        // Xử lý form gửi phản hồi
         document.getElementById('feedbackForm').addEventListener('submit', (e) => {
             e.preventDefault();
+            
+            // Hiển thị trạng thái đang gửi
+            const btn = e.target.querySelector('button[type="submit"]');
+            const originalText = btn.textContent;
+            btn.textContent = "Đang gửi...";
+            btn.disabled = true;
+
             const formData = new FormData(e.target);
             const data = Object.fromEntries(formData);
-            fetch('https://greencycle-gwyz.onrender.com/api/contact', {
+            
+            // SỬA: Dùng đường dẫn tương đối để tránh lỗi CORS và hoạt động trên mọi domain
+            fetch('/api/contact', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(data),
@@ -53,17 +133,23 @@
             .then(response => response.json())
             .then(data => {
                 showToast(data.message, data.success);
-                if (data.success) e.target.reset();
+                if (data.success) {
+                    e.target.reset();
+                    // Đóng modal sau khi gửi thành công (dùng Flowbite Instance hoặc click nút đóng)
+                    const modalEl = document.getElementById('contactModal');
+                    const modal = new Flowbite.Modal(modalEl);
+                    modal.hide();
+                    // Hoặc đơn giản là reload trang sau 2s nếu muốn
+                }
             })
             .catch(error => showToast('Lỗi: ' + error.message, false))
-            .finally(() => document.getElementById('contactPopup').classList.add('hidden'));
+            .finally(() => {
+                btn.textContent = originalText;
+                btn.disabled = false;
+            });
         });
 
-        const navToggle = document.getElementById('navToggle');
-        const navMenu = document.getElementById('navMenu');
-        navToggle.addEventListener('click', () => {
-            navMenu.classList.toggle('active');
-        });
+        // XÓA: navToggle và navMenu cũ (đã có trong navbar.js)
     </script>
 </body>
 </html>
