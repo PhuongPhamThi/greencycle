@@ -33,7 +33,7 @@
                             <option value="">Tất cả loại</option>
                             <option value="hữu cơ">Rác hữu cơ</option>
                             <option value="tái chế">Rác tái chế</option>
-                            </select>
+                        </select>
                     </div>
                     <button type="submit" class="w-full text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
                         <i class="fas fa-search mr-2"></i>Tìm kiếm
@@ -56,46 +56,24 @@
         <div class="relative p-4 w-full max-w-lg h-full md:h-auto">
             <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
                 <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">
-                        Chi tiết Bài đăng Rác thải
-                    </h3>
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Chi tiết Bài đăng Rác thải</h3>
                     <button type="button" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center dark:hover:bg-gray-600 dark:hover:text-white" data-modal-hide="detailModal">
-                        <i class="fas fa-times"></i>
-                        <span class="sr-only">Đóng</span>
+                        <i class="fas fa-times"></i><span class="sr-only">Đóng</span>
                     </button>
                 </div>
                 <div class="p-4 md:p-5 space-y-4">
                     <h4 id="modalWasteType" class="text-2xl font-bold text-green-600 dark:text-green-400"></h4>
-                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-                        <strong class="text-gray-900 dark:text-white">Khối lượng:</strong>
-                        <span id="modalWasteQuantity"></span> kg
-                    </p>
-                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-                        <strong class="text-gray-900 dark:text-white">Địa chỉ:</strong>
-                        <span id="modalWasteLocation"></span>
-                    </p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300"><strong class="text-gray-900 dark:text-white">Khối lượng:</strong> <span id="modalWasteQuantity"></span> kg</p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300"><strong class="text-gray-900 dark:text-white">Địa chỉ:</strong> <span id="modalWasteLocation"></span></p>
                     <hr class="dark:border-gray-600">
                     <h5 class="text-lg font-semibold text-gray-900 dark:text-white">Thông tin Chủ sở hữu (Bên Bán)</h5>
-                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-                        <strong class="text-gray-900 dark:text-white">Tên:</strong>
-                        <span id="modalOwnerName"></span>
-                    </p>
-                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-                        <strong class="text-gray-900 dark:text-white">Email:</strong>
-                        <span id="modalOwnerEmail"></span>
-                    </p>
-                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300">
-                        <strong class="text-gray-900 dark:text-white">SĐT:</strong>
-                        <span id="modalOwnerPhone"></span>
-                    </p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300"><strong class="text-gray-900 dark:text-white">Tên:</strong> <span id="modalOwnerName"></span></p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300"><strong class="text-gray-900 dark:text-white">Email:</strong> <span id="modalOwnerEmail"></span></p>
+                    <p class="text-base leading-relaxed text-gray-700 dark:text-gray-300"><strong class="text-gray-900 dark:text-white">SĐT:</strong> <span id="modalOwnerPhone"></span></p>
                 </div>
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b dark:border-gray-600">
-                    <button id="modalClaimButton" type="button" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">
-                        Nhận Thu Gom
-                    </button>
-                    <button data-modal-hide="detailModal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">
-                        Đóng
-                    </button>
+                    <button id="modalClaimButton" type="button" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 text-center dark:bg-green-600 dark:hover:bg-green-700 dark:focus:ring-green-800">Nhận Thu Gom</button>
+                    <button data-modal-hide="detailModal" type="button" class="py-2.5 px-5 ms-3 text-sm font-medium text-gray-900 focus:outline-none bg-white rounded-lg border border-gray-200 hover:bg-gray-100 hover:text-blue-700 focus:z-10 focus:ring-4 focus:ring-gray-100 dark:focus:ring-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:border-gray-600 dark:hover:text-white dark:hover:bg-gray-700">Đóng</button>
                 </div>
             </div>
         </div>
@@ -113,7 +91,13 @@
             const searchForm = document.getElementById('searchForm');
             const token = localStorage.getItem('token');
 
-            // Lấy các phần tử của Modal
+            // Kiểm tra đăng nhập
+            if (!token) {
+                showToast('Vui lòng đăng nhập tài khoản Recycler!', false);
+                setTimeout(() => window.location.href = '/login.html', 1000);
+                return;
+            }
+
             const modalElement = document.getElementById('detailModal');
             const modal = new Flowbite.Modal(modalElement);
             
@@ -127,31 +111,29 @@
             
             searchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                
-                if (!token) {
-                    showToast('Vui lòng đăng nhập với tài khoản "Bên Mua" (Recycler) để tìm kiếm!', false);
-                    return;
-                }
+                resultsDiv.innerHTML = '<p class="text-gray-500">Đang tìm kiếm...</p>';
 
                 const query = e.target.query.value.toLowerCase();
                 const type = e.target.type.value.toLowerCase();
                 
                 try {
-                    // API này đã được nâng cấp (thêm /auth)
-                    const res = await fetch(`https://greencycle-gwyz.onrender.com/api/auth/waste/search?q=${encodeURIComponent(query)}&status=pending`, {
+                    // SỬA: Dùng đường dẫn tương đối
+                    const res = await fetch(`/api/auth/waste/search?q=${encodeURIComponent(query)}&status=pending`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
-                    if (res.status === 403) {
-                        showToast('Bạn không có quyền tìm kiếm!', false);
-                        resultsDiv.innerHTML = '<p class="text-red-600 dark:text-red-400">Bạn không có quyền truy cập tính năng này.</p>';
+                    if (!res.ok) {
+                        if (res.status === 403) {
+                            resultsDiv.innerHTML = '<p class="text-red-600 font-bold">Lỗi Quyền Truy Cập: Bạn cần đăng nhập bằng tài khoản "Bên Mua" (Recycler) để tìm kiếm.</p>';
+                        } else {
+                            resultsDiv.innerHTML = `<p class="text-red-600">Lỗi Máy chủ (${res.status}). Vui lòng thử lại sau.</p>`;
+                        }
                         return;
                     }
                     
                     const data = await res.json();
                     resultsDiv.innerHTML = ''; 
                     
-                    // Lọc (đã có)
                     const filteredData = data.filter(waste => 
                         (!type || waste.type.toLowerCase().includes(type)) &&
                         (waste.location.toLowerCase().includes(query) || waste.type.toLowerCase().includes(query))
@@ -163,7 +145,6 @@
                     }
                     
                     filteredData.forEach(waste => {
-                        // **SỬA: CARD MỚI (Dùng Flowbite)**
                         const card = document.createElement('div');
                         card.className = "w-full p-4 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700";
                         card.innerHTML = `
@@ -179,40 +160,29 @@
                         `;
                         resultsDiv.appendChild(card);
 
-                        // Gắn sự kiện click cho nút "Xem Chi tiết"
                         card.querySelector('.view-details-btn').addEventListener('click', () => {
-                            showDetails(waste); // Truyền toàn bộ object 'waste'
+                            showDetails(waste); 
                         });
                     });
 
                 } catch (error) {
-                    showToast('Lỗi: ' + error.message, false);
+                    resultsDiv.innerHTML = `<p class="text-red-500">Lỗi kết nối: ${error.message}</p>`;
                 }
             });
 
-            // **HÀM MỚI: Hiển thị chi tiết trong Modal**
             function showDetails(waste) {
-                // 1. Điền dữ liệu vào Modal
                 modalWasteType.textContent = waste.type;
                 modalWasteQuantity.textContent = waste.quantity;
                 modalWasteLocation.textContent = waste.location;
                 modalOwnerName.textContent = waste.ownerName;
                 modalOwnerEmail.textContent = waste.ownerEmail;
                 modalOwnerPhone.textContent = waste.ownerPhone || "Chưa cập nhật";
-                
-                // 2. Gắn ID vào nút "Nhận Thu Gom" trong modal
                 modalClaimButton.dataset.id = waste.id;
-                
-                // 3. Mở modal
                 modal.show();
             }
 
-            // **HÀM CŨ: (Sửa lại để lắng nghe nút trong Modal)**
-            modalClaimButton.addEventListener('click', handleClaimWaste);
-            
-            async function handleClaimWaste(event) {
+            modalClaimButton.addEventListener('click', async (event) => {
                 const wasteId = event.currentTarget.dataset.id;
-                
                 if (!confirm('Bạn có chắc chắn muốn nhận thu gom mục rác này không?')) return;
                 
                 const button = event.currentTarget;
@@ -220,7 +190,7 @@
                 button.textContent = 'Đang xử lý...';
 
                 try {
-                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/collection/claim', {
+                    const res = await fetch('/api/auth/collection/claim', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ wasteId: wasteId })
@@ -230,19 +200,16 @@
                     showToast(data.message, data.success);
                     
                     if (data.success) {
-                        modal.hide(); // Ẩn modal
-                        searchForm.dispatchEvent(new Event('submit')); // Tải lại kết quả
+                        modal.hide(); 
+                        searchForm.dispatchEvent(new Event('submit')); 
                     }
-                    
-                    button.disabled = false;
-                    button.textContent = 'Nhận Thu Gom';
-
                 } catch (err) {
                     showToast('Lỗi kết nối: ' + err.message, false);
+                } finally {
                     button.disabled = false;
                     button.textContent = 'Nhận Thu Gom';
                 }
-            }
+            });
         });
     </script>
 </body>
