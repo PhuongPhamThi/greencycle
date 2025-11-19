@@ -24,7 +24,7 @@
                 <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Tìm kiếm Rác (Bên Mua)</h2>
                 <form id="searchForm" class="space-y-4">
                     <div>
-                        <label for="query" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Từ khóa</label>
+                        <label for="query" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Từ khóa (Địa điểm, Loại)</label>
                         <input type="text" name="query" id="query" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5" placeholder="ví dụ: Cầu Giấy, vỏ trái cây..." required>
                     </div>
                     <div>
@@ -42,7 +42,7 @@
             </div>
             
             <div class="md:col-span-2 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                <h3 class="text-xl mb-4 font-semibold text-gray-900 dark:text-white">Kết quả Tìm kiếm</h3>
+                <h3 class="text-xl mb-4 font-semibold text-gray-900 dark:text-white">Kết quả Tìm kiếm (Các rác đang chờ)</h3>
                 <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <p class="text-gray-500">Vui lòng nhập từ khóa để tìm kiếm...</p>
                 </div>
@@ -61,6 +61,7 @@
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
+                
                 <div class="p-4 md:p-5 space-y-4">
                     <h4 id="modalWasteType" class="text-2xl font-bold text-green-600"></h4>
                     <p class="text-base text-gray-700"><strong class="text-gray-900">Khối lượng:</strong> <span id="modalWasteQuantity"></span> kg</p>
@@ -71,6 +72,7 @@
                     <p class="text-base text-gray-700"><strong class="text-gray-900">Email:</strong> <span id="modalOwnerEmail"></span></p>
                     <p class="text-base text-gray-700"><strong class="text-gray-900">SĐT:</strong> <span id="modalOwnerPhone"></span></p>
                 </div>
+                
                 <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
                     <button id="modalClaimButton" type="button" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 w-full">Nhận Thu Gom</button>
                 </div>
@@ -94,6 +96,7 @@
             const searchForm = document.getElementById('searchForm');
             const token = localStorage.getItem('token');
 
+            // Kiểm tra đăng nhập
             if (!token) {
                 showToast('Vui lòng đăng nhập tài khoản Recycler!', false);
                 setTimeout(() => window.location.href = '/login.html', 1000);
@@ -116,13 +119,17 @@
                 const type = e.target.type.value.toLowerCase();
                 
                 try {
+                    // SỬA: Dùng /api/auth/waste/search VÀ gửi Token
                     const res = await fetch(`/api/auth/waste/search?q=${encodeURIComponent(query)}&status=pending`, {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     
                     if (!res.ok) {
-                        if (res.status === 403) resultsDiv.innerHTML = '<p class="text-red-600 font-bold">Lỗi: Tài khoản không phải Recycler.</p>';
-                        else resultsDiv.innerHTML = `<p class="text-red-600">Lỗi máy chủ (${res.status}).</p>`;
+                        if (res.status === 403) {
+                            resultsDiv.innerHTML = '<p class="text-red-600 font-bold">Lỗi: Tài khoản này không phải "Bên Mua" (Recycler).</p>';
+                        } else {
+                            resultsDiv.innerHTML = `<p class="text-red-600">Lỗi máy chủ (${res.status}).</p>`;
+                        }
                         return;
                     }
                     
@@ -140,32 +147,13 @@
                     }
                     
                     filteredData.forEach(waste => {
-                        // === TÍNH ĐỘ TƯƠI (FRESHNESS) ===
-                        const hoursElapsed = (Date.now() - waste.createdAt) / (1000 * 60 * 60);
-                        let freshnessBadge = '';
-                        let borderClass = 'border-gray-200';
-
-                        if (hoursElapsed < 24) {
-                            freshnessBadge = `<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded"><i class="fas fa-leaf mr-1"></i>Mới đăng</span>`;
-                        } else if (hoursElapsed < 48) {
-                            freshnessBadge = `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded"><i class="fas fa-exclamation-circle mr-1"></i>Sắp hỏng</span>`;
-                            borderClass = 'border-yellow-400'; // Viền vàng
-                        } else {
-                            freshnessBadge = `<span class="bg-red-100 text-red-800 text-xs font-medium px-2.5 py-0.5 rounded"><i class="fas fa-biohazard mr-1"></i>Nguy cơ hỏng</span>`;
-                            borderClass = 'border-red-500'; // Viền đỏ
-                        }
-
                         const card = document.createElement('div');
-                        card.className = `w-full p-4 bg-white border ${borderClass} rounded-lg shadow hover:bg-gray-50 cursor-pointer transition-all`;
+                        card.className = "w-full p-4 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-50 cursor-pointer transition-all";
                         card.innerHTML = `
-                            <div class="flex justify-between items-start mb-2">
-                                <h5 class="text-xl font-bold text-gray-900">${waste.type} (${waste.quantity}kg)</h5>
-                                ${freshnessBadge}
-                            </div>
-                            <p class="mb-1 font-normal text-gray-700"><i class="fas fa-map-marker-alt mr-2 text-gray-400"></i>${waste.location}</p>
-                            <p class="text-xs text-gray-500 mb-3">Đăng ${Math.round(hoursElapsed)} giờ trước</p>
-                            
-                            <span class="text-blue-600 text-sm font-medium inline-block">Xem chi tiết & Nhận</span>
+                            <h5 class="mb-1 text-xl font-bold text-gray-900">${waste.type} (${waste.quantity}kg)</h5>
+                            <p class="mb-2 font-normal text-gray-700">${waste.location}</p>
+                            <p class="text-sm text-gray-500">Đăng bởi: ${waste.ownerName}</p>
+                            <span class="text-blue-600 text-sm font-medium mt-2 inline-block">Xem chi tiết & Nhận</span>
                         `;
                         
                         card.addEventListener('click', () => showDetails(waste));
@@ -184,6 +172,7 @@
                 modalOwnerName.textContent = waste.ownerName;
                 modalOwnerEmail.textContent = waste.ownerEmail;
                 modalOwnerPhone.textContent = waste.ownerPhone || "Chưa cập nhật";
+                
                 modalClaimButton.dataset.id = waste.id;
                 openModal();
             }
@@ -191,6 +180,7 @@
             modalClaimButton.addEventListener('click', async (event) => {
                 const wasteId = event.currentTarget.dataset.id;
                 if (!confirm('Bạn có chắc chắn muốn nhận đơn này không?')) return;
+                
                 const btn = event.currentTarget;
                 btn.textContent = 'Đang xử lý...';
                 btn.disabled = true;
@@ -203,12 +193,13 @@
                     });
                     const data = await res.json();
                     showToast(data.message, data.success);
+                    
                     if (data.success) {
                         closeModal(); 
-                        document.getElementById('searchForm').dispatchEvent(new Event('submit')); 
+                        searchForm.dispatchEvent(new Event('submit')); 
                     }
                 } catch (err) {
-                    showToast('Lỗi: ' + err.message, false);
+                    showToast('Lỗi kết nối: ' + err.message, false);
                 } finally {
                     btn.textContent = 'Nhận Thu Gom';
                     btn.disabled = false;
