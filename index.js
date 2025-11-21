@@ -37,7 +37,8 @@ const app = express();
 
 app.use(express.static('./public'));
 app.use(cors());
-app.use(bodyParser.json());
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
@@ -47,8 +48,8 @@ app.use('/api/auth', authRoutes); // Xử lý: login, register, points, profile
 app.use('/api/auth/waste', wasteRoutes); // Xử lý: /post, /:userId, /search
 app.use('/api/auth/collection', collectionRoutes); // Xử lý: /request
 app.use('/api/collection-points', collectionPointsRoutes); // Xử lý điểm thu gom của admin
-app.use('/api/contact', contactRoutes); // **THÊM MỚI**
-app.use('/api/orders', ordersRoutes); // Giữ lại
+app.use('/api/contact', contactRoutes);
+app.use('/api/orders', ordersRoutes); 
 app.use('/api/rewards', rewardsRoutes);
 
 const path = require('path');
@@ -61,6 +62,9 @@ app.get('/login', (req, res) => {
 });
 app.get('/forgot-password', (req, res) => {
     res.sendFile(path.join(__dirname, './public', 'forgot-password.html'));
+});
+app.get('/reset-password.html', (req, res) => {
+    res.sendFile(path.join(__dirname, './public', 'reset-password.html'));
 });
 app.get('/dashboard', (req, res) => {
     res.sendFile(path.join(__dirname, './public', 'dashboard.html'));

@@ -19,9 +19,7 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// **THÊM MỚI: Middleware chỉ dành cho Admin**
 const adminOnly = (req, res, next) => {
-    // Middleware này phải chạy SAU authMiddleware
     if (req.user.role !== 'admin') {
         return res.status(403).json({ success: false, message: 'Yêu cầu quyền Admin!' });
     }
@@ -37,7 +35,6 @@ function initializeFirebase() {
     return { db, auth };
 }
 
-// (Route /register của bạn giữ nguyên)
 router.post('/register', async (req, res) => {
     const { db, auth } = initializeFirebase();
     const { name, email, password, role } = req.body;
@@ -71,7 +68,6 @@ router.post('/register', async (req, res) => {
     }
 });
 
-// (Route /login của bạn giữ nguyên)
 router.post('/login', async (req, res) => {
     const { db, auth } = initializeFirebase();
     const { email, idToken } = req.body;
@@ -195,18 +191,11 @@ router.post('/admin/create-recycler', authMiddleware, adminOnly, async (req, res
     }
 });
 
-
-// (3 Route /profile của bạn giữ nguyên)
 router.get('/profile', authMiddleware, async (req, res) => {
     const { db } = initializeFirebase();
     try {
-        const userId = req.user.userId;
-        const userSnapshot = await db.ref('users/' + userId).once('value');
-        const userData = userSnapshot.val();
-
-        if (!userData) {
-            return res.status(404).json({ success: false, message: 'Không tìm thấy thông tin người dùng!' });
-        }
+        const userData = (await db.ref('users/' + req.user.userId).once('value')).val();
+        if (!userData) return res.status(404).json({ success: false, message: 'Không tìm thấy thông tin!' });
         res.json({
             success: true,
             profile: {
@@ -216,34 +205,55 @@ router.get('/profile', authMiddleware, async (req, res) => {
                 address: userData.address || '',
                 role: userData.role,
                 points: userData.points || 0,
-                avatar: userData.avatar || ''
+                avatar: userData.avatar || '' 
             }
         });
-    } catch (err) {
-        console.error('Get profile error:', err);
-        res.status(500).json({ success: false, message: 'Lỗi máy chủ!' });
-    }
+    } catch (err) { res.status(500).json({ success: false, message: 'Lỗi máy chủ!' }); }
 });
 
 router.put('/profile', authMiddleware, async (req, res) => {
     const { db } = initializeFirebase();
-    const { name, phone, address } = req.body;
+    const { name, phone, address, avatar } = req.body; 
     const userId = req.user.userId;
 
-    if (!name || name.trim() === '') {
-        return res.status(400).json({ success: false, message: 'Tên không được để trống!' });
-    }
+    if (!name || name.trim() === '') return res.status(400).json({ success: false, message: 'Tên không được để trống!' });
+
     try {
         const updates = {
             name: name.trim(),
             phone: phone?.trim() || '',
             address: address?.trim() || ''
         };
+        if (avatar) {
+            updates.avatar = avatar;
+        }
+
         await db.ref('users/' + userId).update(updates);
         res.json({ success: true, message: 'Cập nhật thông tin thành công!' });
     } catch (err) {
         console.error('Update profile error:', err);
         res.status(500).json({ success: false, message: 'Lỗi máy chủ!' });
+    }
+});
+
+router.put('/change-password', authMiddleware, async (req, res) => {
+    const { db, auth } = initializeFirebase();
+    const { newPassword } = req.body;
+    const userId = req.user.userId;
+
+    if (!newPassword || newPassword.length < 6) {
+        return res.status(400).json({ success: false, message: 'Mật khẩu mới phải có ít nhất 6 ký tự!' });
+    }
+
+    try {
+        // Cập nhật mật khẩu trong Firebase Auth
+        await auth.updateUser(userId, {
+            password: newPassword
+        });
+        res.json({ success: true, message: 'Đổi mật khẩu thành công!' });
+    } catch (err) {
+        console.error('Change password error:', err);
+        res.status(500).json({ success: false, message: 'Lỗi: ' + err.message });
     }
 });
 

@@ -19,6 +19,23 @@
         .avatar { width: 120px; height: 120px; object-fit: cover; }
         .input-focus:focus { outline: none; ring: 2px solid #10b981; border-color: #10b981; }
         .history-list { max-height: 300px; overflow-y: auto; padding-right: 0.5rem; }
+        .avatar-upload-btn {
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            background-color: #10b981;
+            color: white;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: 2px solid white;
+            transition: background 0.2s;
+        }
+        .avatar-upload-btn:hover { background-color: #059669; }
     </style>
 </head>
 <body class="bg-green-50">
@@ -116,21 +133,47 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', () => { // Bọc trong DOMContentLoaded
-            
-            // XÓA: hàm showToast() (đã có trong script.js)
-            // XÓA: hàm navLogout() (đã có trong navbar.js)
-
+        document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
             if (!token) {
                 showToast('Vui lòng đăng nhập!', false);
                 setTimeout(() => window.location.href = '/login.html', 1000);
-                return; // Dừng chạy script
+                return;
             }
             
-            const userRole = jwt_decode(token).role;
+            const decoded = jwt_decode(token);
+            const userRole = decoded.role;
+            const userId = decoded.userId;
+            let currentAvatarBase64 = null;
 
-            // (Hàm loadProfile() giữ nguyên)
+            // === HÀM CONVERT ẢNH SANG BASE64 ===
+            const convertToBase64 = (file) => {
+                return new Promise((resolve, reject) => {
+                    const reader = new FileReader();
+                    reader.readAsDataURL(file);
+                    reader.onload = () => resolve(reader.result);
+                    reader.onerror = (error) => reject(error);
+                });
+            };
+
+            // === XỬ LÝ CHỌN ẢNH ===
+            document.getElementById('avatarInput').addEventListener('change', async (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    if (file.size > 2 * 1024 * 1024) { // Giới hạn 2MB
+                        showToast('Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB.', false);
+                        return;
+                    }
+                    try {
+                        currentAvatarBase64 = await convertToBase64(file);
+                        document.getElementById('avatarImg').src = currentAvatarBase64; // Xem trước
+                        showToast('Đã chọn ảnh. Hãy nhấn "Lưu thay đổi".', true);
+                    } catch (err) {
+                        showToast('Lỗi xử lý ảnh', false);
+                    }
+                }
+            });
+
             async function loadProfile() {
                 try {
                     const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/profile', {
@@ -164,8 +207,6 @@
                     showToast('Lỗi kết nối!', false);
                 }
             }
-            
-            // (Hàm loadRewardHistory() giữ nguyên)
             async function loadRewardHistory() {
                 const listEl = document.getElementById('rewardHistoryList');
                 const loadingEl = document.getElementById('rewardHistoryLoading');
@@ -253,6 +294,10 @@
                     showToast('Tên không được để trống!', false);
                     return; 
                 }
+                const bodyData = { name, phone, address };
+                if (currentAvatarBase64) {
+                    bodyData.avatar = currentAvatarBase64;
+                }
                 try {
                     const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/profile', {
                         method: 'PUT',
@@ -262,10 +307,40 @@
                     const data = await res.json();
                     showToast(data.message, data.success);
                     if (data.success) {
-                        loadProfile(); // Cập nhật lại header + form
+                        loadProfile();
                     }
                 } catch (err) {
                     showToast('Lỗi kết nối!', false);
+                }
+            });
+            // === ĐỔI MẬT KHẨU ===
+            document.getElementById('changePasswordForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const newPass = document.getElementById('newPassword').value;
+                const confirmPass = document.getElementById('confirmPassword').value;
+
+                if (newPass !== confirmPass) {
+                    showToast('Mật khẩu xác nhận không khớp!', false);
+                    return;
+                }
+
+                try {
+                    const res = await fetch('/api/auth/change-password', {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ newPassword: newPass })
+                    });
+                    const data = await res.json();
+                    showToast(data.message, data.success);
+                    if (data.success) {
+                        // Đóng modal (Flowbite)
+                        const modalEl = document.getElementById('passwordModal');
+                        const modal = new Flowbite.Modal(modalEl);
+                        modal.hide();
+                        e.target.reset();
+                    }
+                } catch (err) {
+                    showToast('Lỗi đổi mật khẩu: ' + err.message, false);
                 }
             });
             
@@ -300,7 +375,7 @@
                 loadRewardHistory(); 
                 loadWasteHistory();
             }
-        }); // Hết DOMContentLoaded
+        });
     </script>
 </body>
 </html>
