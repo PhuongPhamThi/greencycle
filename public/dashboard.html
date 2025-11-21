@@ -19,134 +19,177 @@
         <h1 class="text-3xl font-bold mb-6 text-gray-900 dark:text-white">Dashboard</h1>
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             
-            <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
+            <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700 h-fit">
                 <h2 class="text-xl font-semibold mb-2 text-gray-900 dark:text-white">Chào mừng, <span id="userName" class="text-green-500">...</span></h2>
                 <p class="text-lg text-gray-700 dark:text-gray-400">
                     Điểm xanh của bạn: <span id="points" class="font-bold text-yellow-500">...</span>
                 </p>
                 
                 <h3 class="text-lg font-semibold mt-6 mb-4 text-gray-900 dark:text-white">Đăng tải Chất thải Mới</h3>
-                
                 <form id="postForm" class="space-y-4">
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Loại chất thải</label>
-                        <input type="text" name="type" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5" placeholder="Vỏ trái cây, rau hỏng..." required>
+                        <input type="text" name="type" id="type" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Ví dụ: Vỏ trái cây" required>
                     </div>
                     
                     <div>
-                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white" for="file_input">Hình ảnh rác (Tùy chọn)</label>
+                        <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Hình ảnh (Tùy chọn)</label>
                         <input class="block w-full text-sm text-gray-900 border border-gray-300 rounded-lg cursor-pointer bg-gray-50 dark:text-gray-400 focus:outline-none" id="wasteImage" type="file" accept="image/*">
-                        <p class="mt-1 text-sm text-gray-500 dark:text-gray-300">SVG, PNG, JPG (Tối đa 5MB).</p>
                     </div>
 
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Khối lượng (kg)</label>
-                        <input type="number" name="quantity" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5" placeholder="2.5" step="0.1" required>
+                        <input type="number" name="quantity" id="quantity" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="2.5" step="0.1" required>
                     </div>
                     <div>
                         <label class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Mô tả vị trí</label>
-                        <input type="text" name="locationName" id="locationName" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5" placeholder="Nhà tôi, 123 ABC" required>
+                        <input type="text" name="locationName" id="locationName" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:text-white" placeholder="Nhà tôi, 123 ABC" required>
                     </div>
                     <input type="hidden" name="lat" id="lat"><input type="hidden" name="lng" id="lng">
-                    
                     <div class="flex gap-2">
-                         <button type="button" id="getLocationBtn" class="flex-1 text-gray-900 bg-yellow-400 hover:bg-yellow-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                            <i class="fas fa-map-marker-alt mr-2"></i> Lấy vị trí
-                        </button>
-                        <button type="submit" id="submitBtn" class="flex-1 text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">
-                            Đăng tải
-                        </button>
+                        <button type="button" id="getLocationBtn" class="flex-1 text-gray-900 bg-yellow-400 hover:bg-yellow-500 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Lấy vị trí</button>
+                        <button type="submit" id="postBtn" class="flex-1 text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5 text-center">Đăng tải</button>
                     </div>
                 </form>
             </div>
 
             <div class="block p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
                 <h3 class="text-lg font-semibold mb-4 text-gray-900 dark:text-white">Trạng thái Rác của bạn</h3>
-                <ul id="wasteList" class="space-y-3 max-h-[500px] overflow-y-auto pr-2">
+                <ul id="wasteList" class="space-y-3 max-h-[600px] overflow-y-auto pr-2">
                     <p class="text-gray-500">Đang tải dữ liệu...</p>
                 </ul>
+                <h3 class="text-lg font-semibold mt-6 mb-4 text-gray-900 dark:text-white">Trạng thái Thu gom</h3>
+                <p class="text-sm text-gray-600 dark:text-gray-400">Rác bạn đăng sẽ tự động hiển thị cho "Bên Mua". Họ sẽ là người chấp nhận thu gom.</p>
             </div>
         </div>
     </main>
 
     <footer id="footer-placeholder"></footer>
 
-    <script src="js/jwt-decode.min.js"></script>
-    <script src="script.js"></script> 
-    <script src="js/navbar.js"></script> 
-    <script src="js/footer.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
+    <div id="editModal" tabindex="-1" aria-hidden="true" class="hidden overflow-y-auto overflow-x-hidden fixed top-0 right-0 left-0 z-50 justify-center items-center w-full md:inset-0 h-modal md:h-full">
+        <div class="relative p-4 w-full max-w-md h-full md:h-auto">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <button type="button" class="absolute top-3 right-2.5 text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm p-1.5 ml-auto inline-flex items-center dark:hover:bg-gray-800 dark:hover:text-white" data-modal-hide="editModal">
+                    <i class="fas fa-times"></i>
+                </button>
+                <div class="p-6 text-center">
+                    <h3 class="mb-5 text-lg font-normal text-gray-500 dark:text-gray-400">Chỉnh sửa bài đăng</h3>
+                    <form id="editForm" class="space-y-4 text-left">
+                        <input type="hidden" id="editId">
+                        <div><label class="block mb-2 text-sm font-medium">Loại rác</label><input type="text" id="editType" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"></div>
+                        <div><label class="block mb-2 text-sm font-medium">Khối lượng (kg)</label><input type="number" id="editQuantity" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5" step="0.1"></div>
+                        <div><label class="block mb-2 text-sm font-medium">Địa chỉ</label><input type="text" id="editLocation" class="bg-gray-50 border border-gray-300 text-sm rounded-lg block w-full p-2.5"></div>
+                        <button type="submit" class="w-full text-white bg-blue-600 hover:bg-blue-800 font-medium rounded-lg text-sm px-5 py-2.5">Cập nhật</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/jwt-decode.min.js"></script><script src="script.js"></script><script src="js/navbar.js"></script><script src="js/footer.js"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
             const token = localStorage.getItem('token');
             if (!token) { window.location.href = '/login.html'; return; }
-
             const decoded = jwt_decode(token);
             const userId = decoded.userId;
             document.getElementById('userName').textContent = decoded.name || 'User';
 
-            // Lấy điểm
-            fetch('/api/auth/points', { headers: { Authorization: `Bearer ${token}` } })
-                .then(res => res.json())
-                .then(data => document.getElementById('points').textContent = data.success ? data.points : 'Lỗi');
-
-            // Hàm chuyển File thành Base64
+            // Hàm chuyển ảnh
             const convertToBase64 = (file) => {
                 return new Promise((resolve, reject) => {
                     const reader = new FileReader();
                     reader.readAsDataURL(file);
                     reader.onload = () => resolve(reader.result);
-                    reader.onerror = (error) => reject(error);
+                    reader.onerror = error => reject(error);
                 });
             };
 
-            // Hàm lấy danh sách rác
-            async function fetchWasteList() {
-                const listElement = document.getElementById('wasteList');
-                try {
-                    const res = await fetch(`/api/auth/waste/${userId}`, {
-                        headers: { Authorization: `Bearer ${token}` },
-                    });
-                    if (!res.ok) throw new Error("Lỗi tải danh sách");
-                    const data = await res.json();
-                    listElement.innerHTML = '';
+            fetch('/api/auth/points', { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => res.json()).then(data => document.getElementById('points').textContent = data.success ? data.points : '...');
 
+            // Tải danh sách
+            function fetchWasteList() {
+                const listElement = document.getElementById('wasteList');
+                fetch(`/api/auth/waste/${userId}`, { headers: { Authorization: `Bearer ${token}` } })
+                .then(res => res.json())
+                .then(data => {
+                    listElement.innerHTML = '';
                     if (Array.isArray(data) && data.length > 0) {
                         data.forEach(waste => {
-                            let statusBadge = waste.status === 'collected' 
-                                ? `<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Đã nhận</span>`
-                                : `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Đang chờ</span>`;
-                            
-                            // Kiểm tra có ảnh không
-                            let imageHtml = '';
-                            if (waste.image) {
-                                imageHtml = `<img src="${waste.image}" class="w-12 h-12 object-cover rounded-md border border-gray-200 ml-2" title="Có ảnh đính kèm">`;
-                            }
-
                             const li = document.createElement('li');
-                            li.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200 flex justify-between items-center';
-                            li.innerHTML = `
-                                <div class="flex items-center">
-                                    ${imageHtml}
-                                    <div class="ml-2">
-                                        <p class="font-medium text-gray-900">${waste.type} (${waste.quantity}kg)</p>
-                                        <p class="text-xs text-gray-500">${waste.location}</p>
+                            li.className = 'p-3 bg-gray-50 rounded-lg border border-gray-200';
+                            
+                            let statusHtml = '';
+                            let actionHtml = '';
+
+                            if (waste.status === 'collected') {
+                                statusHtml = `<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Đã nhận</span>`;
+                            } else {
+                                statusHtml = `<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Đang chờ</span>`;
+                                // Chỉ hiện nút Sửa/Xóa khi chưa có người nhận
+                                actionHtml = `
+                                    <div class="flex gap-2 mt-2">
+                                        <button onclick="openEditModal('${waste.id}', '${waste.type}', '${waste.quantity}', '${waste.location}')" class="text-blue-600 hover:underline text-xs font-medium"><i class="fas fa-edit"></i> Sửa</button>
+                                        <button onclick="deleteWaste('${waste.id}')" class="text-red-600 hover:underline text-xs font-medium"><i class="fas fa-trash"></i> Xóa</button>
                                     </div>
+                                `;
+                            }
+                            
+                            // Hiển thị ảnh nhỏ
+                            let imgHtml = waste.image ? `<img src="${waste.image}" class="w-10 h-10 object-cover rounded ml-2">` : '';
+
+                            li.innerHTML = `
+                                <div class="flex justify-between items-start">
+                                    <div class="flex items-center">
+                                        ${imgHtml}
+                                        <div class="ml-2">
+                                            <p class="font-medium text-gray-900">${waste.type} (${waste.quantity}kg)</p>
+                                            <p class="text-xs text-gray-500">${waste.location}</p>
+                                        </div>
+                                    </div>
+                                    ${statusHtml}
                                 </div>
-                                ${statusBadge}
+                                ${actionHtml}
                             `;
                             listElement.appendChild(li);
                         });
                     } else {
                         listElement.innerHTML = '<p class="text-gray-500 italic">Bạn chưa đăng tải mục rác nào.</p>';
                     }
-                } catch (err) {
-                    listElement.innerHTML = `<p class="text-red-500">Lỗi: ${err.message}</p>`;
-                }
+                })
+                .catch(err => listElement.innerHTML = `<p class="text-red-500">Lỗi: ${err.message}</p>`);
             }
-
             fetchWasteList();
+
+            // Logic Đăng tải (Có ảnh)
+            document.getElementById('postForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const postBtn = document.getElementById('postBtn');
+                postBtn.textContent = "Đang gửi..."; postBtn.disabled = true;
+
+                const formData = new FormData(e.target);
+                const data = Object.fromEntries(formData);
+                
+                // Xử lý ảnh
+                const fileInput = document.getElementById('wasteImage');
+                if (fileInput.files.length > 0) {
+                    if (fileInput.files[0].size > 5 * 1024 * 1024) {
+                        showToast("Ảnh quá lớn (<5MB)!", false); postBtn.disabled = false; return;
+                    }
+                    data.image = await convertToBase64(fileInput.files[0]);
+                }
+
+                fetch('/api/auth/waste/post', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                    body: JSON.stringify(data),
+                }).then(res => res.json()).then(d => {
+                    showToast(d.message, d.success);
+                    if(d.success) { e.target.reset(); fetchWasteList(); }
+                }).finally(() => { postBtn.textContent = "Đăng tải"; postBtn.disabled = false; });
+            });
 
             // Logic Lấy vị trí
             document.getElementById('getLocationBtn').addEventListener('click', () => {
@@ -154,56 +197,53 @@
                     document.getElementById('lat').value = p.coords.latitude;
                     document.getElementById('lng').value = p.coords.longitude;
                     document.getElementById('locationName').value = `Vị trí: ${p.coords.latitude.toFixed(4)}, ${p.coords.longitude.toFixed(4)}`;
-                    showToast('Đã lấy vị trí!', true);
-                }, () => showToast('Không thể lấy vị trí.', false));
-            });
-
-            // Logic Submit Form (CÓ XỬ LÝ ẢNH)
-            document.getElementById('postForm').addEventListener('submit', async (e) => {
-                e.preventDefault();
-                const submitBtn = document.getElementById('submitBtn');
-                submitBtn.disabled = true;
-                submitBtn.textContent = "Đang xử lý...";
-
-                const formData = new FormData(e.target);
-                const data = Object.fromEntries(formData);
-
-                // Xử lý file ảnh
-                const fileInput = document.getElementById('wasteImage');
-                if (fileInput.files.length > 0) {
-                    const file = fileInput.files[0];
-                    if (file.size > 5 * 1024 * 1024) { // 5MB
-                        showToast("Ảnh quá lớn! Vui lòng chọn ảnh dưới 5MB.", false);
-                        submitBtn.disabled = false;
-                        submitBtn.textContent = "Đăng tải";
-                        return;
-                    }
-                    try {
-                        data.image = await convertToBase64(file);
-                    } catch (err) {
-                        showToast("Lỗi xử lý ảnh", false);
-                    }
-                }
-
-                fetch('/api/auth/waste/post', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
-                    body: JSON.stringify(data),
-                })
-                .then(res => res.json())
-                .then(d => {
-                    showToast(d.message, d.success);
-                    if(d.success) {
-                        e.target.reset();
-                        fetchWasteList();
-                    }
-                })
-                .catch(err => showToast('Lỗi: ' + err.message, false))
-                .finally(() => {
-                    submitBtn.disabled = false;
-                    submitBtn.textContent = "Đăng tải";
                 });
             });
+
+            // === CÁC HÀM TOÀN CỤC ĐỂ GỌI TỪ HTML ===
+            const editModal = new Flowbite.Modal(document.getElementById('editModal'));
+            
+            window.openEditModal = (id, type, qty, loc) => {
+                document.getElementById('editId').value = id;
+                document.getElementById('editType').value = type;
+                document.getElementById('editQuantity').value = qty;
+                document.getElementById('editLocation').value = loc;
+                editModal.show();
+            };
+
+            window.deleteWaste = async (id) => {
+                if(!confirm('Bạn có chắc muốn xóa bài này? (Điểm sẽ bị trừ lại)')) return;
+                try {
+                    const res = await fetch(`/api/auth/waste/${id}`, {
+                        method: 'DELETE',
+                        headers: { Authorization: `Bearer ${token}` }
+                    });
+                    const d = await res.json();
+                    showToast(d.message, d.success);
+                    if(d.success) fetchWasteList();
+                } catch(e) { showToast('Lỗi xóa', false); }
+            };
+
+            document.getElementById('editForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const id = document.getElementById('editId').value;
+                const data = {
+                    type: document.getElementById('editType').value,
+                    quantity: document.getElementById('editQuantity').value,
+                    locationName: document.getElementById('editLocation').value
+                };
+                try {
+                    const res = await fetch(`/api/auth/waste/${id}`, {
+                        method: 'PUT',
+                        headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${token}` },
+                        body: JSON.stringify(data)
+                    });
+                    const d = await res.json();
+                    showToast(d.message, d.success);
+                    if(d.success) { editModal.hide(); fetchWasteList(); }
+                } catch(e) { showToast('Lỗi cập nhật', false); }
+            });
+
         });
     </script>
 </body>

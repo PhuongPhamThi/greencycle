@@ -34,7 +34,7 @@ const recyclerOnly = (req, res, next) => {
  * @access  Recycler, Admin
  */
 router.post('/claim', authMiddleware, recyclerOnly, async (req, res) => {
-    const { wasteId } = req.body;
+    const { wasteId, shippingMethod  } = req.body;
     const recyclerUserId = req.user.userId; // ID của "Bên Mua"
 
     if (!wasteId) {
@@ -54,6 +54,24 @@ router.post('/claim', authMiddleware, recyclerOnly, async (req, res) => {
             return res.status(400).json({ success: false, message: 'Rác này đã được người khác nhận!' });
         }
 
+        // Logic trạng thái vận chuyển
+        let newStatus = 'collected'; // Mặc định là đã thu gom xong (nếu tự lấy)
+        let shippingStatus = 'none';
+
+        if (shippingMethod === 'delivery') {
+            newStatus = 'delivering'; // Đang giao hàng
+            shippingStatus = 'preparing'; // Đang chuẩn bị hàng
+        }
+
+        // Cập nhật DB
+        await wasteRef.update({ 
+            status: newStatus,
+            shippingMethod: shippingMethod, // 'self' hoặc 'delivery'
+            shippingStatus: shippingStatus,
+            collectedAt: Date.now(),
+            collectedBy: recyclerUserId
+        });
+
         // Cập nhật trạng thái và ghi lại ai đã nhận
         await wasteRef.update({ 
             status: 'collected', // (Bạn có thể đổi thành 'in_progress' nếu muốn)
@@ -71,7 +89,7 @@ router.post('/claim', authMiddleware, recyclerOnly, async (req, res) => {
             createdAt: Date.now()
         });
 
-        res.json({ success: true, message: 'Nhận thu gom thành công!' });
+        res.json({ success: true, message: 'Nhận đơn thành công! Kiểm tra trạng thái trong Hồ sơ.' });
 
     } catch (err) {
         console.error("Lỗi khi nhận thu gom (claim):", err);

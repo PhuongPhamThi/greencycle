@@ -160,7 +160,7 @@
             document.getElementById('avatarInput').addEventListener('change', async (e) => {
                 const file = e.target.files[0];
                 if (file) {
-                    if (file.size > 2 * 1024 * 1024) { // Giới hạn 2MB
+                    if (file.size > 5 * 1024 * 1024) { // Giới hạn 2MB
                         showToast('Ảnh quá lớn! Vui lòng chọn ảnh dưới 2MB.', false);
                         return;
                     }
@@ -176,7 +176,7 @@
 
             async function loadProfile() {
                 try {
-                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/profile', {
+                    const res = await fetch('/api/auth/profile', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -200,8 +200,14 @@
                     if(p.role === 'recycler') roleText = 'Đối tác Tái chế (Bên Mua)';
                     if(p.role === 'admin') roleText = 'Quản trị viên';
                     document.getElementById('profileRole').textContent = roleText;
-                    document.getElementById('profilePoints').textContent = p.points;
+                    if (userRole === 'household' || userRole === 'business') {
+                        document.getElementById('pointsContainer').style.display = 'block';
+                        document.getElementById('profilePoints').textContent = p.points;
+                        document.getElementById('sellerHistoryContainer').style.display = 'grid';
+                        loadWasteHistory(decoded.userId);
+                        loadRewardHistory();
 
+                    }
                 } catch (err) {
                     console.error('Lỗi tải profile:', err);
                     showToast('Lỗi kết nối!', false);
@@ -211,7 +217,7 @@
                 const listEl = document.getElementById('rewardHistoryList');
                 const loadingEl = document.getElementById('rewardHistoryLoading');
                 try {
-                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/rewards/history', {
+                    const res = await fetch('/api/rewards/history', {
                         headers: { 'Authorization': `Bearer ${token}` }
                     });
                     const data = await res.json();
@@ -284,6 +290,54 @@
                 }
             }
 
+            async function loadRecyclerHistory() {
+                const tbody = document.getElementById('recyclerHistoryList');
+                try {
+                    const res = await fetch(`https://greencycle-gwyz.onrender.com/api/auth/waste/collected/${userId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    tbody.innerHTML = '';
+
+                    if (!Array.isArray(data) || data.length === 0) {
+                        tbody.innerHTML = '<tr class="bg-white border-b"><td colspan="7" class="px-6 py-4 text-center">Chưa có đơn hàng nào.</td></tr>';
+                        return;
+                    }
+
+                    data.forEach(item => {
+                        const tr = document.createElement('tr');
+                        tr.className = "bg-white border-b hover:bg-gray-50";
+                        
+                        // Logic hiển thị trạng thái vận chuyển
+                        let shipMethodText = item.shippingMethod === 'delivery' ? 
+                            '<span class="text-blue-600 font-semibold"><i class="fas fa-truck"></i> Giao hàng</span>' : 
+                            '<span class="text-gray-600"><i class="fas fa-user"></i> Tự lấy</span>';
+                        
+                        let shipStatusBadge = '';
+                        if (item.shippingMethod === 'delivery') {
+                            if (item.shippingStatus === 'preparing') shipStatusBadge = '<span class="bg-yellow-100 text-yellow-800 text-xs font-medium px-2.5 py-0.5 rounded">Đang chuẩn bị</span>';
+                            else if (item.shippingStatus === 'shipping') shipStatusBadge = '<span class="bg-blue-100 text-blue-800 text-xs font-medium px-2.5 py-0.5 rounded">Đang giao</span>';
+                            else shipStatusBadge = '<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Đã giao</span>';
+                        } else {
+                            shipStatusBadge = '<span class="bg-green-100 text-green-800 text-xs font-medium px-2.5 py-0.5 rounded">Hoàn thành</span>';
+                        }
+
+                        tr.innerHTML = `
+                            <td class="px-6 py-4 font-medium text-gray-900">${item.type}</td>
+                            <td class="px-6 py-4">${item.quantity} kg</td>
+                            <td class="px-6 py-4">${item.ownerName}</td>
+                            <td class="px-6 py-4">${item.location}</td>
+                            <td class="px-6 py-4">${item.ownerPhone}</td>
+                            <td class="px-6 py-4">${shipMethodText}</td>
+                            <td class="px-6 py-4">${shipStatusBadge}</td>
+                        `;
+                        tbody.appendChild(tr);
+                    });
+                } catch (err) {
+                    tbody.innerHTML = '<tr class="bg-white border-b"><td colspan="7" class="text-center text-red-500">Lỗi tải dữ liệu.</td></tr>';
+                }
+            }
+
             // (Logic Update Profile (CRUD) giữ nguyên)
             document.getElementById('editProfileForm').addEventListener('submit', async (e) => {
                 e.preventDefault();
@@ -299,7 +353,7 @@
                     bodyData.avatar = currentAvatarBase64;
                 }
                 try {
-                    const res = await fetch('https://greencycle-gwyz.onrender.com/api/auth/profile', {
+                    const res = await fetch('/api/auth/profile', {
                         method: 'PUT',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
                         body: JSON.stringify({ name, phone, address })
@@ -307,6 +361,7 @@
                     const data = await res.json();
                     showToast(data.message, data.success);
                     if (data.success) {
+                        currentAvatarBase64 = null;
                         loadProfile();
                     }
                 } catch (err) {
@@ -344,7 +399,7 @@
                 }
             });
             
-            // (Logic Disable Account (CRUD) giữ nguyên)
+
             const modal = document.getElementById('disableModal');
             document.getElementById('disableAccountBtn').addEventListener('click', () => { modal.classList.remove('hidden'); });
             document.getElementById('cancelDisable').addEventListener('click', () => { modal.classList.add('hidden'); });
