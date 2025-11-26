@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSKH - GreenCycle</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
+    <style>
+        body { font-family: 'Inter', sans-serif; height: 100vh; overflow: hidden; }
+        .chat-container { height: calc(100vh - 64px); } /* Trừ đi chiều cao header */
+        .message-bubble { max-width: 75%; word-wrap: break-word; }
+        .scrollbar-hide::-webkit-scrollbar { display: none; }
+        .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+    </style>
+</head>
+<body class="bg-gray-100 dark:bg-gray-900">
+
+    <header class="bg-white border-b border-gray-200 h-16 flex items-center px-6 justify-between shadow-sm z-10 relative">
+        <div class="flex items-center gap-3">
+            <a href="/admin.html" class="text-gray-500 hover:text-green-600"><i class="fas fa-arrow-left"></i> Quay lại</a>
+            <span class="text-xl font-bold text-green-700">Trung tâm Hỗ trợ Khách hàng</span>
+        </div>
+        <div class="flex items-center gap-2">
+            <div class="w-3 h-3 bg-green-500 rounded-full animate-pulse"></div>
+            <span class="text-sm text-gray-600">Trực tuyến</span>
+        </div>
+    </header>
+
+    <div class="flex chat-container bg-white">
+        
+        <div class="w-1/3 border-r border-gray-200 flex flex-col bg-gray-50">
+            <div class="p-4 border-b border-gray-200 bg-white">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-3 text-gray-400"></i>
+                    <input type="text" placeholder="Tìm người dùng..." class="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-full text-sm focus:outline-none focus:border-green-500">
+                </div>
+            </div>
+            
+            <div id="userList" class="flex-1 overflow-y-auto">
+                <p class="text-center text-gray-500 mt-10">Đang tải danh sách...</p>
+                </div>
+        </div>
+
+        <div class="w-2/3 flex flex-col relative">
+            
+            <div id="chatHeader" class="h-16 border-b border-gray-200 flex items-center px-6 justify-between bg-white hidden">
+                <div class="flex items-center">
+                    <img id="currentAvatar" src="https://via.placeholder.com/40" class="w-10 h-10 rounded-full object-cover mr-3">
+                    <div>
+                        <h3 id="currentName" class="font-bold text-gray-800">Tên User</h3>
+                        <span id="currentEmail" class="text-xs text-gray-500">email@example.com</span>
+                    </div>
+                </div>
+            </div>
+
+            <div id="welcomeScreen" class="flex-1 flex flex-col items-center justify-center text-gray-400">
+                <i class="fas fa-comments fa-4x mb-4 text-gray-300"></i>
+                <p class="text-lg">Chọn một cuộc hội thoại để bắt đầu</p>
+            </div>
+
+            <div id="messagesArea" class="flex-1 overflow-y-auto p-6 space-y-4 bg-white hidden scrollbar-hide">
+                </div>
+
+            <div id="inputArea" class="p-4 border-t border-gray-200 bg-gray-50 hidden">
+                <form id="replyForm" class="flex gap-2">
+                    <input type="text" id="replyInput" class="flex-1 border border-gray-300 rounded-full px-5 py-3 focus:outline-none focus:border-green-500 focus:ring-1 focus:ring-green-500" placeholder="Nhập tin nhắn trả lời..." autocomplete="off">
+                    <button type="submit" class="bg-green-600 text-white w-12 h-12 rounded-full hover:bg-green-700 transition-colors flex items-center justify-center shadow-lg">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </form>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="js/jwt-decode.min.js"></script>
+    <script src="script.js"></script>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const token = localStorage.getItem('token');
+            // Kiểm tra quyền Admin
+            if (!token) { window.location.href = '/login.html'; return; }
+            try {
+                const decoded = jwt_decode(token);
+                if (decoded.role !== 'admin') {
+                    alert('Chỉ Admin mới được truy cập!');
+                    window.location.href = '/dashboard.html';
+                    return;
+                }
+            } catch (e) { window.location.href = '/login.html'; return; }
+
+            const userListEl = document.getElementById('userList');
+            const messagesArea = document.getElementById('messagesArea');
+            const chatHeader = document.getElementById('chatHeader');
+            const inputArea = document.getElementById('inputArea');
+            const welcomeScreen = document.getElementById('welcomeScreen');
+            const replyInput = document.getElementById('replyInput');
+            
+            let currentChatUserId = null;
+            let pollingInterval = null;
+
+            // 1. Tải danh sách User (Cột trái)
+            async function loadUsers() {
+                try {
+                    const res = await fetch('/api/contact/admin/list-users', {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        userListEl.innerHTML = '';
+                        data.users.forEach(u => {
+                            const isActive = u.userId === currentChatUserId ? 'bg-green-50 border-l-4 border-green-500' : 'hover:bg-gray-50 border-l-4 border-transparent';
+                            const timeString = new Date(u.lastTime).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+                            const avatarUrl = u.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(u.name);
+
+                            const div = document.createElement('div');
+                            div.className = `flex items-center p-4 cursor-pointer border-b border-gray-100 transition-all ${isActive}`;
+                            div.innerHTML = `
+                                <img src="${avatarUrl}" class="w-12 h-12 rounded-full object-cover mr-3 shadow-sm">
+                                <div class="flex-1 min-w-0">
+                                    <div class="flex justify-between mb-1">
+                                        <h3 class="text-sm font-bold text-gray-900 truncate">${u.name}</h3>
+                                        <span class="text-xs text-gray-400">${timeString}</span>
+                                    </div>
+                                    <p class="text-sm text-gray-500 truncate w-40">${u.lastMessage}</p>
+                                </div>
+                            `;
+                            div.onclick = () => selectUser(u);
+                            userListEl.appendChild(div);
+                        });
+                    }
+                } catch (err) { console.error(err); }
+            }
+
+            // 2. Chọn User để chat
+            function selectUser(user) {
+                currentChatUserId = user.userId;
+                
+                // Cập nhật UI
+                welcomeScreen.classList.add('hidden');
+                chatHeader.classList.remove('hidden');
+                messagesArea.classList.remove('hidden');
+                inputArea.classList.remove('hidden');
+                
+                document.getElementById('currentName').textContent = user.name;
+                document.getElementById('currentEmail').textContent = user.email;
+                document.getElementById('currentAvatar').src = user.avatar || 'https://ui-avatars.com/api/?name=' + encodeURIComponent(user.name);
+
+                loadMessages(); // Tải tin nhắn ngay
+                loadUsers(); // Reload cột trái để cập nhật trạng thái active
+                
+                // Bắt đầu polling tin nhắn mới mỗi 3s
+                if (pollingInterval) clearInterval(pollingInterval);
+                pollingInterval = setInterval(loadMessages, 3000);
+            }
+
+            // 3. Tải nội dung chat (Cột phải)
+            async function loadMessages() {
+                if (!currentChatUserId) return;
+                try {
+                    const res = await fetch(`/api/contact/admin/history/${currentChatUserId}`, {
+                        headers: { 'Authorization': `Bearer ${token}` }
+                    });
+                    const data = await res.json();
+                    
+                    if (data.success) {
+                        messagesArea.innerHTML = '';
+                        data.messages.forEach(msg => {
+                            const isMe = msg.sender === 'admin';
+                            const div = document.createElement('div');
+                            div.className = `flex ${isMe ? 'justify-end' : 'justify-start'}`;
+                            
+                            const bubbleColor = isMe ? 'bg-green-600 text-white rounded-br-none' : 'bg-gray-200 text-gray-800 rounded-bl-none';
+                            
+                            div.innerHTML = `
+                                <div class="message-bubble ${bubbleColor} py-2 px-4 rounded-2xl shadow-sm text-sm">
+                                    ${msg.text}
+                                </div>
+                            `;
+                            messagesArea.appendChild(div);
+                        });
+                        // Cuộn xuống cuối
+                        messagesArea.scrollTop = messagesArea.scrollHeight;
+                    }
+                } catch (err) { console.error(err); }
+            }
+
+            // 4. Gửi tin nhắn trả lời
+            document.getElementById('replyForm').addEventListener('submit', async (e) => {
+                e.preventDefault();
+                const text = replyInput.value.trim();
+                if (!text || !currentChatUserId) return;
+
+                // Hiện ngay lập tức (Optimistic UI)
+                const div = document.createElement('div');
+                div.className = `flex justify-end`;
+                div.innerHTML = `<div class="message-bubble bg-green-600 text-white py-2 px-4 rounded-2xl rounded-br-none shadow-sm text-sm">${text}</div>`;
+                messagesArea.appendChild(div);
+                messagesArea.scrollTop = messagesArea.scrollHeight;
+                replyInput.value = '';
+
+                try {
+                    await fetch('/api/contact/admin/reply', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ targetUserId: currentChatUserId, message: text })
+                    });
+                    loadUsers(); // Cập nhật lại danh sách bên trái (để update last message)
+                } catch (err) {
+                    showToast('Lỗi gửi tin', false);
+                }
+            });
+
+            // Chạy lần đầu
+            loadUsers();
+            setInterval(loadUsers, 10000); // Cập nhật danh sách user mỗi 10s
+        });
+    </script>
+</body>
+</html>
