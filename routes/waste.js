@@ -5,8 +5,6 @@ const router = express.Router();
 const db = admin.database();
 const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret';
 
-const UNIT_PRICE = 5000; // Giá mặc định: 5.000 VNĐ / kg
-
 // Middleware xác thực
 const authMiddleware = (req, res, next) => {
     const token = req.headers.authorization?.split(' ')[1];
@@ -20,59 +18,51 @@ const authMiddleware = (req, res, next) => {
     }
 };
 
-// Middleware phân quyền
-const providerOnly = (req, res, next) => {
-    const role = req.user.role;
-    if (role === 'household' || role === 'business' || role === 'admin') next();
-    else res.status(403).json({ success: false, message: 'Bạn không có quyền thực hiện hành động này!' });
-};
-const recyclerOnly = (req, res, next) => {
-    const role = req.user.role;
-    if (role === 'recycler' || role === 'admin') next();
-    else res.status(403).json({ success: false, message: 'Bạn không có quyền truy cập tài nguyên này!' });
-};
-const adminOnly = (req, res, next) => {
-    if (req.user.role !== 'admin') return res.status(403).json({ success: false, message: 'Yêu cầu quyền Admin!' });
-    next();
-};
-
-// --- CÁC ROUTE API ---
-
-// 1. Đăng tải rác (Tự động tính giá)
-router.post('/post', authMiddleware, providerOnly, async (req, res) => {
+// 1. Đăng tải rác
+router.post('/post', authMiddleware, async (req, res) => {
     const { type, quantity, locationName, lat, lng, image } = req.body; 
-    if (!type || !quantity || !locationName) return res.status(400).json({ success: false, message: 'Thiếu thông tin!' });
-    
+    if (!type || !quantity || !locationName) {
+        return res.status(400).json({ success: false, message: 'Thiếu thông tin!' });
+    }
     try {
-        const qty = parseFloat(quantity);
-        const estimatedPrice = qty * UNIT_PRICE; // Tính giá trị đơn hàng
-
         const wasteRef = db.ref('wastes').push();
         await wasteRef.set({
             userId: req.user.userId,
             type, 
-            quantity: qty, 
-            price: estimatedPrice, // Lưu giá vào DB
+            quantity: parseFloat(quantity), 
             location: locationName,
-            lat: parseFloat(lat)||0, lng: parseFloat(lng)||0, image: image||'',
-            status: 'pending', createdAt: Date.now()
+            lat: parseFloat(lat)||0, 
+            lng: parseFloat(lng)||0, 
+            image: image||'',
+            status: 'pending', 
+            createdAt: Date.now()
         });
-        await db.ref('users/' + req.user.userId).update({ points: admin.database.ServerValue.increment(qty) });
+        
+        // Cộng điểm xanh
+        await db.ref('users/' + req.user.userId).update({ 
+            points: admin.database.ServerValue.increment(parseFloat(quantity)) 
+        });
+        
         res.json({ success: true, message: 'Đăng tải thành công!' });
-    } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
-// 2. Tìm kiếm (Bên Mua)
-router.get('/search', authMiddleware, recyclerOnly, async (req, res) => {
+// 2. Tìm kiếm (Cho bên mua)
+router.get('/search', async (req, res) => {
     const { q, type, status } = req.query;
     try {
+        // Lấy users để hiển thị tên
         const usersSnapshot = await db.ref('users').once('value');
         const usersMap = usersSnapshot.val() || {};
+        
         const wastesSnapshot = await db.ref('wastes').once('value');
         const wastesData = wastesSnapshot.val() || {};
         
         let wastes = Object.keys(wastesData).map(key => ({ ...wastesData[key], id: key }));
 
+        // Lọc dữ liệu
         if (q) {
             const lowerQ = q.toLowerCase();
             wastes = wastes.filter(w => (w.location?.toLowerCase().includes(lowerQ) || w.type?.toLowerCase().includes(lowerQ)));
@@ -80,69 +70,112 @@ router.get('/search', authMiddleware, recyclerOnly, async (req, res) => {
         if (type) wastes = wastes.filter(w => w.type?.toLowerCase() === type.toLowerCase());
         if (status) wastes = wastes.filter(w => w.status === status);
         
+        // Gộp thông tin người đăng
         const mergedWastes = wastes.map(waste => {
             const owner = usersMap[waste.userId] || {};
-            return { 
-                ...waste, 
-                price: waste.price || (waste.quantity * UNIT_PRICE), // Đảm bảo luôn có giá
-                ownerName: owner.name || 'Ẩn danh', 
-                ownerPhone: owner.phone || '', 
-                ownerEmail: owner.email || '' 
+            return {
+                ...waste,
+                ownerName: owner.name || 'Ẩn danh',
+                ownerPhone: owner.phone || '',
+                ownerEmail: owner.email || ''
             };
         });
         res.json(mergedWastes);
-    } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
-// 3. Lấy rác của User (Dashboard)
-router.get('/:userId', authMiddleware, providerOnly, async (req, res) => {
-    if (req.params.userId !== req.user.userId) return res.status(403).json({ success: false });
+// 3. Lấy danh sách của User (Cho Dashboard)
+router.get('/:userId', authMiddleware, async (req, res) => {
+    // Chỉ cho phép xem của chính mình
+    if (req.params.userId !== req.user.userId) {
+        return res.status(403).json({ success: false, message: 'Không có quyền truy cập!' });
+    }
     try {
         const wastesSnapshot = await db.ref('wastes').orderByChild('userId').equalTo(req.params.userId).once('value');
         const wastesData = wastesSnapshot.val() || {};
-        const wastesArray = Object.keys(wastesData).map(key => ({ ...wastesData[key], id: key })).reverse();
-        res.json(wastesArray);
-    } catch (err) { res.status(500).json({ success: false, message: err.message }); }
-});
-
-// 4. Admin lấy TẤT CẢ (Kèm thông tin thanh toán)
-router.get('/admin/all', authMiddleware, adminOnly, async (req, res) => {
-    try {
-        const usersSnapshot = await db.ref('users').once('value');
-        const usersMap = usersSnapshot.val() || {};
-        const wastesSnapshot = await db.ref('wastes').once('value');
-        const wastesData = wastesSnapshot.val() || {};
         
-        let wastes = Object.keys(wastesData).map(key => {
-            const w = wastesData[key];
-            const owner = usersMap[w.userId] || {};
-            
-            let collectorInfo = null;
-            if (w.collectedBy && usersMap[w.collectedBy]) {
-                const c = usersMap[w.collectedBy];
-                collectorInfo = { name: c.name, email: c.email, phone: c.phone || '' };
-            }
-
-            return {
-                id: key,
-                ...w,
-                price: w.price || (w.quantity * UNIT_PRICE),
-                ownerName: owner.name || 'Unknown',
-                ownerEmail: owner.email || 'Unknown',
-                collector: collectorInfo
-            };
-        });
-        wastes.reverse();
-        res.json(wastes);
-    } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+        // Chuyển object thành array và đảo ngược (mới nhất lên đầu)
+        const wastesArray = Object.keys(wastesData).map(key => ({ 
+            ...wastesData[key], 
+            id: key 
+        })).reverse();
+        
+        res.json(wastesArray);
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
-// 5. Admin XÓA
-router.delete('/admin/:id', authMiddleware, adminOnly, async (req, res) => {
+// ==========================================
+// THÊM MỚI: API SỬA VÀ XÓA (FIX LỖI 404)
+// ==========================================
+
+// 4. Cập nhật bài đăng (PUT)
+router.put('/:id', authMiddleware, async (req, res) => {
+    const wasteId = req.params.id;
+    const { type, quantity, locationName } = req.body; // Nhận dữ liệu sửa
+    const userId = req.user.userId;
+
     try {
-        await db.ref('wastes/' + req.params.id).remove();
+        const wasteRef = db.ref('wastes/' + wasteId);
+        const snapshot = await wasteRef.once('value');
+        const waste = snapshot.val();
+
+        if (!waste) return res.status(404).json({ success: false, message: 'Bài đăng không tồn tại!' });
+        
+        // Kiểm tra quyền sở hữu
+        if (waste.userId !== userId) {
+            return res.status(403).json({ success: false, message: 'Bạn không có quyền sửa bài này!' });
+        }
+        
+        // Kiểm tra trạng thái (chỉ sửa được khi chưa ai nhận)
+        if (waste.status !== 'pending') {
+            return res.status(400).json({ success: false, message: 'Không thể sửa bài đã được thu gom!' });
+        }
+
+        // Thực hiện update
+        const updates = {};
+        if (type) updates.type = type;
+        if (quantity) updates.quantity = parseFloat(quantity);
+        if (locationName) updates.location = locationName;
+        
+        await wasteRef.update(updates);
+        res.json({ success: true, message: 'Cập nhật bài đăng thành công!' });
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
+});
+
+// 5. Xóa bài đăng (DELETE)
+router.delete('/:id', authMiddleware, async (req, res) => {
+    const wasteId = req.params.id;
+    const userId = req.user.userId;
+
+    try {
+        const wasteRef = db.ref('wastes/' + wasteId);
+        const snapshot = await wasteRef.once('value');
+        const waste = snapshot.val();
+
+        if (!waste) return res.status(404).json({ success: false, message: 'Bài đăng không tồn tại!' });
+        if (waste.userId !== userId) return res.status(403).json({ success: false, message: 'Bạn không có quyền xóa bài này!' });
+        if (waste.status !== 'pending') return res.status(400).json({ success: false, message: 'Không thể xóa bài đã được thu gom!' });
+
+        // Xóa bài
+        await wasteRef.remove();
+        
+        // Trừ điểm đã cộng (tránh gian lận)
+        if (waste.quantity > 0) {
+            await db.ref('users/' + userId).update({ 
+                points: admin.database.ServerValue.increment(-parseFloat(waste.quantity)) 
+            });
+        }
+
         res.json({ success: true, message: 'Đã xóa bài đăng!' });
-    } catch (err) { res.status(500).json({ success: false, message: err.message }); }
+    } catch (err) {
+        res.status(500).json({ success: false, message: err.message });
+    }
 });
 
 module.exports = router;
