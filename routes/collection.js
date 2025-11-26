@@ -34,7 +34,7 @@ const recyclerOnly = (req, res, next) => {
  * @access  Recycler, Admin
  */
 router.post('/claim', authMiddleware, recyclerOnly, async (req, res) => {
-    const { wasteId, shippingMethod  } = req.body;
+    const { wasteId, shippingMethod, paymentMethod} = req.body;
     const recyclerUserId = req.user.userId; // ID của "Bên Mua"
 
     if (!wasteId) {
@@ -51,7 +51,7 @@ router.post('/claim', authMiddleware, recyclerOnly, async (req, res) => {
 
         // Kiểm tra xem rác còn "pending" không
         if (waste.status !== 'pending') {
-            return res.status(400).json({ success: false, message: 'Rác này đã được người khác nhận!' });
+            return res.status(400).json({ success: false, message: 'Chất thải này đã được người khác nhận!' });
         }
 
         // Logic trạng thái vận chuyển
@@ -68,6 +68,7 @@ router.post('/claim', authMiddleware, recyclerOnly, async (req, res) => {
             status: newStatus,
             shippingMethod: shippingMethod, // 'self' hoặc 'delivery'
             shippingStatus: shippingStatus,
+            paymentMethod: paymentMethod, // 'full' hoặc 'deposit'
             collectedAt: Date.now(),
             collectedBy: recyclerUserId
         });

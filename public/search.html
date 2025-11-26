@@ -129,6 +129,7 @@
                 return;
             }
 
+            const modalWastePrice = document.getElementById('modalWastePrice');
             const modalWasteImage = document.getElementById('modalWasteImage');
             const modalWasteType = document.getElementById('modalWasteType');
             const modalWasteQuantity = document.getElementById('modalWasteQuantity');
@@ -194,30 +195,34 @@
             });
 
             function showDetails(waste) {
-                modalWasteType.textContent = waste.type;
-                modalWasteQuantity.textContent = waste.quantity;
-                modalWasteLocation.textContent = waste.location;
-                modalOwnerName.textContent = waste.ownerName;
-                modalOwnerPhone.textContent = waste.ownerPhone || "Chưa cập nhật";
+                document.getElementById('modalWasteType').textContent = waste.type;
+                document.getElementById('modalWasteQuantity').textContent = waste.quantity;
+                document.getElementById('modalWasteLocation').textContent = waste.location;
+                document.getElementById('modalOwnerName').textContent = waste.ownerName;
+                document.getElementById('modalOwnerPhone').textContent = waste.ownerPhone || "Chưa cập nhật";
                 
+                // Hiển thị giá (Định dạng tiền tệ)
+                const price = waste.price || (waste.quantity * 5000); // Fallback nếu db cũ chưa có price
+                document.getElementById('modalWastePrice').textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
+
                 if (waste.image) {
-                    modalWasteImage.src = waste.image;
-                    modalWasteImage.classList.remove('hidden');
+                    document.getElementById('modalWasteImage').src = waste.image;
+                    document.getElementById('modalWasteImage').classList.remove('hidden');
                 } else {
-                    modalWasteImage.classList.add('hidden');
+                    document.getElementById('modalWasteImage').classList.add('hidden');
                 }
                 
-                modalClaimButton.dataset.id = waste.id;
+                document.getElementById('modalClaimButton').dataset.id = waste.id;
                 openModal();
             }
 
             // 2. Xử lý nút NHẬN THU GOM (Gửi thêm shippingMethod)
-            modalClaimButton.addEventListener('click', async (event) => {
+            document.getElementById('modalClaimButton').addEventListener('click', async (event) => {
                 const wasteId = event.currentTarget.dataset.id;
-                // Lấy phương thức vận chuyển
                 const shippingMethod = document.querySelector('input[name="shippingMethod"]:checked').value;
-                
-                if (!confirm('Bạn có chắc chắn muốn nhận đơn này không?')) return;
+                const paymentMethod = document.querySelector('input[name="paymentMethod"]:checked').value; // Mới
+
+                if (!confirm('Xác nhận thanh toán và nhận đơn?')) return;
                 
                 const btn = event.currentTarget;
                 btn.textContent = 'Đang xử lý...';
@@ -227,20 +232,18 @@
                     const res = await fetch('/api/auth/collection/claim', {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                        // Gửi thêm shippingMethod lên server
-                        body: JSON.stringify({ wasteId: wasteId, shippingMethod: shippingMethod })
+                        body: JSON.stringify({ wasteId, shippingMethod, paymentMethod }) // Gửi cả 2
                     });
                     const data = await res.json();
                     showToast(data.message, data.success);
-                    
                     if (data.success) {
                         closeModal(); 
                         document.getElementById('searchForm').dispatchEvent(new Event('submit')); 
                     }
                 } catch (err) {
-                    showToast('Lỗi kết nối: ' + err.message, false);
+                    showToast('Lỗi: ' + err.message, false);
                 } finally {
-                    btn.textContent = 'Nhận Thu Gom';
+                    btn.textContent = 'Xác nhận & Thanh toán';
                     btn.disabled = false;
                 }
             });

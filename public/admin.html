@@ -192,6 +192,7 @@
                 }
 
                 wastes.forEach(w => {
+                    const price = w.price ? new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(w.price) : '0 đ';
                     const tr = document.createElement('tr');
                     tr.className = 'bg-white border-b hover:bg-gray-50';
                     
@@ -208,6 +209,13 @@
                         </div>`;
                     }
 
+                    // Format thanh toán
+                    let paymentHtml = '<span class="text-gray-400">-</span>';
+                    if (w.paymentMethod) {
+                        const payText = w.paymentMethod === 'full' ? 'Toàn bộ' : 'Đặt cọc';
+                        paymentHtml = `<span class="text-xs font-bold ${w.paymentMethod === 'full' ? 'text-green-600' : 'text-orange-600'}">${payText}</span>`;
+                    }
+
                     tr.innerHTML = `
                         <td class="px-6 py-4 font-medium text-gray-900">${w.type}</td>
                         <td class="px-6 py-4">${w.quantity}</td>
@@ -216,6 +224,8 @@
                             <div class="text-xs text-gray-500">${w.ownerEmail}</div>
                         </td>
                         <td class="px-6 py-4">${statusHtml}</td>
+                        <td class="px-6 py-4 font-bold text-gray-900">${price}</td>
+                        <td class="px-6 py-4">${paymentHtml}</td>
                         <td class="px-6 py-4">${collectorHtml}</td> <td class="px-6 py-4">
                             <button onclick="deleteWaste('${w.id}')" class="text-red-600 hover:underline">Xóa</button>
                         </td>
