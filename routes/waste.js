@@ -90,6 +90,45 @@ router.get('/:userId', authMiddleware, providerOnly, async (req, res) => {
     } catch (err) { res.status(500).json({ success: false, message: err.message }); }
 });
 
+router.get('/collected/:recyclerId', authMiddleware, recyclerOnly, async (req, res) => {
+    if (req.params.recyclerId !== req.user.userId) {
+        return res.status(403).json({ success: false, message: 'Không có quyền truy cập!' });
+    }
+    try {
+        // Lấy toàn bộ rác để gộp thông tin người bán
+        const wastesSnapshot = await db.ref('wastes').once('value');
+        const wastesData = wastesSnapshot.val() || {};
+        
+        // Lấy thông tin người dùng để hiển thị tên người bán
+        const usersSnapshot = await db.ref('users').once('value');
+        const usersMap = usersSnapshot.val() || {};
+
+        // Lọc ra những rác được thu gom bởi recyclerId này
+        const collectedWastes = Object.keys(wastesData)
+            .map(key => ({ ...wastesData[key], id: key }))
+            .filter(item => item.collectedBy === req.params.recyclerId);
+        
+        // Gộp thông tin người bán vào
+        const result = collectedWastes.map(waste => {
+            const owner = usersMap[waste.userId] || {};
+            return {
+                ...waste,
+                ownerName: owner.name || 'Ẩn danh',
+                ownerPhone: owner.phone || 'Chưa cập nhật',
+                ownerEmail: owner.email || 'Ẩn'
+            };
+        });
+
+        // Sắp xếp mới nhất
+        result.sort((a, b) => (b.collectedAt || 0) - (a.collectedAt || 0));
+
+        res.json(result);
+    } catch (err) {
+        console.error("Lỗi lấy lịch sử thu mua:", err);
+        res.status(500).json({ success: false, message: 'Lỗi server: ' + err.message });
+    }
+});
+
 // === ADMIN ROUTES (PHẦN QUAN TRỌNG BẠN ĐANG THIẾU) ===
 
 // 4. Admin lấy TẤT CẢ bài đăng rác
