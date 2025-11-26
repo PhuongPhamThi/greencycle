@@ -6,6 +6,8 @@
     <title>GREENCYCLE - Tìm kiếm</title>
     
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="styles.css">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.css" rel="stylesheet" />
@@ -22,25 +24,29 @@
                 <h2 class="text-2xl font-semibold mb-4 text-gray-900 dark:text-white">Tìm kiếm Rác (Bên Mua)</h2>
                 <form id="searchForm" class="space-y-4">
                     <div>
-                        <label for="query" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Từ khóa</label>
-                        <input type="text" name="query" id="query" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5" placeholder="ví dụ: Cầu Giấy..." required>
+                        <label for="query" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Từ khóa (Địa điểm, Loại)</label>
+                        <input type="text" name="query" id="query" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5 dark:bg-gray-700 dark:border-gray-600 dark:placeholder-gray-400 dark:text-white" placeholder="ví dụ: Cầu Giấy, vỏ trái cây...">
                     </div>
                     <div>
                         <label for="type" class="block mb-2 text-sm font-medium text-gray-900 dark:text-white">Loại rác</label>
-                        <select name="type" id="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg block w-full p-2.5">
+                        <select name="type" id="type" class="bg-gray-50 border border-gray-300 text-gray-900 text-sm rounded-lg focus:ring-green-500 focus:border-green-500 block w-full p-2.5">
                             <option value="">Tất cả loại</option>
                             <option value="hữu cơ">Rác hữu cơ</option>
                             <option value="tái chế">Rác tái chế</option>
                         </select>
                     </div>
-                    <button type="submit" class="w-full text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5"><i class="fas fa-search mr-2"></i>Tìm kiếm</button>
+                    <button type="submit" class="w-full text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5">
+                        <i class="fas fa-search mr-2"></i> Tìm kiếm
+                    </button>
                 </form>
             </div>
             
             <div class="md:col-span-2 p-6 bg-white border border-gray-200 rounded-lg shadow dark:bg-gray-800 dark:border-gray-700">
-                <h3 class="text-xl mb-4 font-semibold text-gray-900 dark:text-white">Kết quả Tìm kiếm</h3>
+                <h3 id="resultTitle" class="text-xl mb-4 font-semibold text-gray-900 dark:text-white">
+                    <i class="fas fa-star text-yellow-400 mr-2"></i>Gợi ý hôm nay (Rác chưa thu gom)
+                </h3>
                 <div id="searchResults" class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <p class="text-gray-500">Vui lòng nhập từ khóa để tìm kiếm...</p>
+                    <p class="text-gray-500 dark:text-gray-400">Đang tải danh sách đề xuất...</p>
                 </div>
             </div>
         </div>
@@ -49,89 +55,35 @@
     <footer id="footer-placeholder"></footer>
 
     <div id="manualModal" tabindex="-1" aria-hidden="true" class="hidden fixed inset-0 z-50 flex justify-center items-center w-full h-full bg-black bg-opacity-50">
-        <div class="relative p-4 w-full max-w-lg max-h-[90vh] flex flex-col">
-            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700 flex flex-col max-h-full">
-                
-                <div class="flex items-center justify-between p-4 border-b rounded-t dark:border-gray-600">
-                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Chi tiết Đơn hàng</h3>
-                    <button type="button" onclick="closeModal()" class="text-gray-400 hover:bg-gray-200 rounded-lg text-sm w-8 h-8 inline-flex justify-center items-center"><i class="fas fa-times"></i></button>
-                </div>
-                
-                <div class="p-4 space-y-4 overflow-y-auto">
-                    <img id="modalWasteImage" src="" class="w-full h-40 object-cover rounded-lg hidden border">
-                    
-                    <div class="flex justify-between items-start">
-                        <div>
-                            <h4 id="modalWasteType" class="text-2xl font-bold text-green-600"></h4>
-                            <p class="text-gray-700"><span id="modalWasteQuantity"></span> kg</p>
-                        </div>
-                        <div class="text-right">
-                            <p class="text-sm text-gray-500">Giá trị đơn hàng</p>
-                            <p id="modalWastePrice" class="text-xl font-bold text-red-600">0 đ</p>
-                        </div>
-                    </div>
-                    
-                    <p class="text-gray-700"><i class="fas fa-map-marker-alt mr-2"></i><span id="modalWasteLocation"></span></p>
-                    
-                    <hr class="dark:border-gray-600">
-
-                    <h5 class="text-sm font-bold uppercase text-gray-500">Vận chuyển</h5>
-                    <div class="grid grid-cols-2 gap-2">
-                        <div>
-                            <input type="radio" id="ship-self" name="shippingMethod" value="self" class="hidden peer" checked>
-                            <label for="ship-self" class="block p-2 text-center border rounded-lg cursor-pointer peer-checked:border-green-600 peer-checked:text-green-600 peer-checked:bg-green-50 hover:bg-gray-50">
-                                <i class="fas fa-car"></i> Tự đến lấy
-                            </label>
-                        </div>
-                        <div>
-                            <input type="radio" id="ship-delivery" name="shippingMethod" value="delivery" class="hidden peer">
-                            <label for="ship-delivery" class="block p-2 text-center border rounded-lg cursor-pointer peer-checked:border-blue-600 peer-checked:text-blue-600 peer-checked:bg-blue-50 hover:bg-gray-50">
-                                <i class="fas fa-truck"></i> Giao hàng
-                            </label>
-                        </div>
-                    </div>
-                    
-                    <div id="deliveryNote" class="hidden p-3 text-sm text-blue-800 border border-blue-300 rounded-lg bg-blue-50">
-                        <i class="fas fa-info-circle mr-1"></i> Phí vận chuyển sẽ được tính sau.
-                    </div>
-
-                    <h5 class="text-sm font-bold uppercase text-gray-500 mt-2">Thanh toán</h5>
-                    <div class="space-y-2">
-                        <div class="flex items-center ps-4 border border-gray-200 rounded-lg dark:border-gray-700">
-                            <input id="pay-full" type="radio" value="full" name="paymentMethod" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500" checked>
-                            <label for="pay-full" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                Thanh toán ngay (100%)
-                            </label>
-                        </div>
-                        <div class="flex items-center ps-4 border border-gray-200 rounded-lg dark:border-gray-700">
-                            <input id="pay-deposit" type="radio" value="deposit" name="paymentMethod" class="w-4 h-4 text-blue-600 bg-gray-100 border-gray-300 focus:ring-blue-500">
-                            <label for="pay-deposit" class="w-full py-3 ms-2 text-sm font-medium text-gray-900 dark:text-gray-300">
-                                Đặt cọc trước (30%)
-                            </label>
-                        </div>
-                    </div>
-
-                    <hr class="dark:border-gray-600">
-                    <div class="text-sm text-gray-500">
-                        Đăng bởi: <span id="modalOwnerName" class="font-medium text-gray-900"></span> 
-                        (<span id="modalOwnerPhone"></span>)
-                    </div>
-                    <span id="modalOwnerEmail" class="hidden"></span>
-                </div>
-                
-                <div class="p-4 border-t rounded-b">
-                    <button id="modalClaimButton" class="w-full text-white bg-green-700 hover:bg-green-800 font-medium rounded-lg text-sm px-5 py-2.5">
-                        Xác nhận & Thanh toán
+        <div class="relative p-4 w-full max-w-lg max-h-full">
+            <div class="relative bg-white rounded-lg shadow dark:bg-gray-700">
+                <div class="flex items-center justify-between p-4 md:p-5 border-b rounded-t dark:border-gray-600">
+                    <h3 class="text-xl font-semibold text-gray-900 dark:text-white">Chi tiết Rác thải</h3>
+                    <button type="button" onclick="closeModal()" class="text-gray-400 bg-transparent hover:bg-gray-200 hover:text-gray-900 rounded-lg text-sm w-8 h-8 ms-auto inline-flex justify-center items-center">
+                        <i class="fas fa-times"></i>
                     </button>
+                </div>
+                
+                <div class="p-4 md:p-5 space-y-4">
+                    <h4 id="modalWasteType" class="text-2xl font-bold text-green-600"></h4>
+                    <p class="text-base text-gray-700"><strong class="text-gray-900">Khối lượng:</strong> <span id="modalWasteQuantity"></span> kg</p>
+                    <p class="text-base text-gray-700"><strong class="text-gray-900">Địa chỉ:</strong> <span id="modalWasteLocation"></span></p>
+                    <hr class="dark:border-gray-600">
+                    <h5 class="text-lg font-semibold text-gray-900">Người đăng (Bên Bán)</h5>
+                    <p class="text-base text-gray-700"><strong class="text-gray-900">Mã người đăng:</strong> <span id="modalUserId"></span></p>
+                </div>
+                
+                <div class="flex items-center p-4 md:p-5 border-t border-gray-200 rounded-b">
+                    <button id="modalClaimButton" type="button" class="text-white bg-green-700 hover:bg-green-800 focus:ring-4 focus:outline-none focus:ring-green-300 font-medium rounded-lg text-sm px-5 py-2.5 w-full">Nhận Thu Gom</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <script src="js/jwt-decode.min.js"></script>
-    <script src="script.js"></script>
-    <script src="js/navbar.js"></script>
-    <script src="js/footer.js"></script>
+    
+    <script src="js/jwt-decode.min.js"></script> 
+    <script src="script.js"></script> 
+    <script src="js/navbar.js"></script> 
+    <script src="js/footer.js"></script> 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.4.1/flowbite.min.js"></script>
     
     <script>
@@ -141,154 +93,123 @@
 
         document.addEventListener('DOMContentLoaded', () => {
             const resultsDiv = document.getElementById('searchResults');
+            const resultTitle = document.getElementById('resultTitle');
             const searchForm = document.getElementById('searchForm');
+            // Lấy token để xác thực (nếu backend yêu cầu)
             const token = localStorage.getItem('token');
 
-            if (!token) {
-                // Nếu chưa đăng nhập, có thể chuyển hướng hoặc báo lỗi
-                // window.location.href = '/login.html'; 
-            }
+            // Các biến modal
+            const modalWasteType = document.getElementById('modalWasteType');
+            const modalWasteQuantity = document.getElementById('modalWasteQuantity');
+            const modalWasteLocation = document.getElementById('modalWasteLocation');
+            const modalUserId = document.getElementById('modalUserId');
+            const modalClaimButton = document.getElementById('modalClaimButton');
+            
+            // **TỰ ĐỘNG TẢI DANH SÁCH GỢI Ý (KHI VÀO TRANG)**
+            loadWastes('');
 
-            // Biến UI
-            const deliveryNote = document.getElementById('deliveryNote');
-            document.getElementById('ship-delivery').addEventListener('change', () => deliveryNote.classList.remove('hidden'));
-            document.getElementById('ship-self').addEventListener('change', () => deliveryNote.classList.add('hidden'));
-
-            // Tìm kiếm
+            // Xử lý Tìm kiếm (Khi bấm nút)
             searchForm.addEventListener('submit', async (e) => {
                 e.preventDefault();
-                if (!token) { showToast('Vui lòng đăng nhập!', false); return; }
-
                 const query = e.target.query.value.toLowerCase();
                 const type = e.target.type.value.toLowerCase();
                 
-                resultsDiv.innerHTML = '<p class="text-gray-500">Đang tìm kiếm...</p>';
+                // Đổi tiêu đề
+                resultTitle.innerHTML = '<i class="fas fa-search mr-2"></i>Kết quả tìm kiếm';
+                
+                // Gọi hàm tải với bộ lọc
+                loadWastes(query, type);
+            });
+
+            // Hàm tải và hiển thị rác
+            async function loadWastes(query = '', type = '') {
+                resultsDiv.innerHTML = '<p class="text-gray-500">Đang tải dữ liệu...</p>';
 
                 try {
-                    const res = await fetch(`/api/auth/waste/search?q=${encodeURIComponent(query)}&status=pending`, {
-                        headers: { 'Authorization': `Bearer ${token}` }
-                    });
+                    // Gọi API lấy TẤT CẢ rác (đường dẫn tương đối)
+                    // Lưu ý: API /search của bạn hiện tại đang lọc trên server nếu có query.
+                    // Để lấy "Gợi ý", ta gọi không tham số, hoặc tham số mặc định.
+                    // Thêm status=pending để chỉ lấy rác chưa thu gom
+                    let url = `/api/auth/waste/search?status=pending`;
+                    if (query) url += `&q=${encodeURIComponent(query)}`;
+                    if (type) url += `&type=${encodeURIComponent(type)}`;
                     
-                    if (!res.ok) {
-                         const msg = res.status === 403 ? 'Lỗi: Bạn không phải Bên Mua.' : 'Lỗi máy chủ.';
-                         resultsDiv.innerHTML = `<p class="text-red-500">${msg}</p>`;
-                         return;
-                    }
-
+                    const res = await fetch(url); // Nếu backend cần token, thêm header Authorization
                     const data = await res.json();
+
                     resultsDiv.innerHTML = ''; 
                     
-                    const filteredData = data.filter(waste => 
-                        (!type || waste.type.toLowerCase().includes(type)) &&
-                        (waste.location.toLowerCase().includes(query) || waste.type.toLowerCase().includes(query))
-                    );
-                    
-                    if (filteredData.length === 0) {
-                         resultsDiv.innerHTML = '<p class="text-gray-500">Không tìm thấy kết quả.</p>';
+                    if (data.length === 0) {
+                         resultsDiv.innerHTML = '<p class="text-gray-500">Hiện chưa có đơn rác nào phù hợp.</p>';
                          return;
                     }
                     
-                    filteredData.forEach(waste => {
+                    data.forEach(waste => {
                         const card = document.createElement('div');
                         card.className = "w-full p-4 bg-white border border-gray-200 rounded-lg shadow hover:bg-gray-50 cursor-pointer transition-all";
-                        
-                        // Format giá ở card ngoài (nếu cần)
-                        const price = waste.price || (waste.quantity * 5000);
-                        const priceText = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-
                         card.innerHTML = `
-                            <div class="flex justify-between">
-                                <h5 class="mb-1 text-xl font-bold text-gray-900">${waste.type} (${waste.quantity}kg)</h5>
-                                <span class="text-red-600 font-bold">${priceText}</span>
-                            </div>
+                            <h5 class="mb-1 text-xl font-bold text-gray-900">${waste.type} (${waste.quantity}kg)</h5>
                             <p class="mb-2 font-normal text-gray-700">${waste.location}</p>
-                            <p class="text-sm text-gray-500">Đăng bởi: ${waste.ownerName}</p>
                             <span class="text-blue-600 text-sm font-medium inline-block mt-2">Xem chi tiết & Nhận</span>
                         `;
                         
                         card.addEventListener('click', () => showDetails(waste));
                         resultsDiv.appendChild(card);
                     });
+
                 } catch (error) {
-                    resultsDiv.innerHTML = `<p class="text-red-500">Lỗi: ${error.message}</p>`;
+                    resultsDiv.innerHTML = `<p class="text-red-500">Lỗi kết nối: ${error.message}</p>`;
                 }
-            });
+            }
 
-            // Hàm hiển thị chi tiết (Đã sửa lỗi null)
             function showDetails(waste) {
-                document.getElementById('modalWasteType').textContent = waste.type;
-                document.getElementById('modalWasteQuantity').textContent = waste.quantity;
-                document.getElementById('modalWasteLocation').textContent = waste.location;
+                modalWasteType.textContent = waste.type;
+                modalWasteQuantity.textContent = waste.quantity;
+                modalWasteLocation.textContent = waste.location;
+                modalUserId.textContent = waste.userId; // Hoặc tên nếu có
                 
-                // Thông tin người đăng
-                document.getElementById('modalOwnerName').textContent = waste.ownerName || 'Ẩn danh';
-                document.getElementById('modalOwnerPhone').textContent = waste.ownerPhone || 'Chưa cập nhật';
-                // Email có thể ẩn hoặc hiện tùy ý
-                const emailEl = document.getElementById('modalOwnerEmail');
-                if(emailEl) emailEl.textContent = waste.ownerEmail || '';
-                
-                // Hiển thị giá tiền
-                const price = waste.price || (waste.quantity * 5000); 
-                const priceEl = document.getElementById('modalWastePrice');
-                if(priceEl) {
-                    priceEl.textContent = new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(price);
-                }
-
-                // Ảnh
-                const imgEl = document.getElementById('modalWasteImage');
-                if (waste.image) {
-                    imgEl.src = waste.image;
-                    imgEl.classList.remove('hidden');
-                } else {
-                    imgEl.classList.add('hidden');
-                }
-                
-                // Gắn ID vào nút nhận
-                const claimBtn = document.getElementById('modalClaimButton');
-                if(claimBtn) claimBtn.dataset.id = waste.id;
-                
+                modalClaimButton.dataset.id = waste.id;
                 openModal();
             }
 
-            // Xử lý nút Nhận đơn
-            const claimBtn = document.getElementById('modalClaimButton');
-            if(claimBtn) {
-                claimBtn.addEventListener('click', async (event) => {
-                    const wasteId = event.currentTarget.dataset.id;
-                    // Lấy giá trị radio button an toàn hơn
-                    const shipOption = document.querySelector('input[name="shippingMethod"]:checked');
-                    const payOption = document.querySelector('input[name="paymentMethod"]:checked');
-                    
-                    const shippingMethod = shipOption ? shipOption.value : 'self';
-                    const paymentMethod = payOption ? payOption.value : 'full';
+            modalClaimButton.addEventListener('click', async (event) => {
+                const wasteId = event.currentTarget.dataset.id;
+                if (!confirm('Bạn có chắc chắn muốn nhận đơn này không?')) return;
+                
+                const btn = event.currentTarget;
+                btn.textContent = 'Đang xử lý...';
+                btn.disabled = true;
 
-                    if (!confirm('Xác nhận thanh toán và nhận đơn này?')) return;
-                    
-                    const btn = event.currentTarget;
-                    btn.textContent = 'Đang xử lý...';
-                    btn.disabled = true;
-
-                    try {
-                        const res = await fetch('/api/auth/collection/claim', {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
-                            body: JSON.stringify({ wasteId, shippingMethod, paymentMethod })
-                        });
-                        const data = await res.json();
-                        showToast(data.message, data.success);
-                        
-                        if (data.success) {
-                            closeModal(); 
-                            document.getElementById('searchForm').dispatchEvent(new Event('submit')); 
-                        }
-                    } catch (err) {
-                        showToast('Lỗi kết nối: ' + err.message, false);
-                    } finally {
-                        btn.textContent = 'Xác nhận & Thanh toán';
-                        btn.disabled = false;
+                try {
+                    // Cần Token để nhận đơn
+                    if (!token) {
+                        showToast('Vui lòng đăng nhập để nhận đơn!', false);
+                        return;
                     }
-                });
-            }
+
+                    const res = await fetch('/api/auth/collection/request', { // Kiểm tra lại đường dẫn API nhận đơn của bạn
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` },
+                        body: JSON.stringify({ wasteId: wasteId })
+                    });
+                    const data = await res.json();
+                    
+                    showToast(data.message, data.success);
+                    
+                    if (data.success) {
+                        closeModal(); 
+                        // Tải lại danh sách (Gợi ý hoặc Tìm kiếm tùy trạng thái hiện tại)
+                        const currentQuery = document.getElementById('query').value.toLowerCase();
+                        const currentType = document.getElementById('type').value.toLowerCase();
+                        loadWastes(currentQuery, currentType);
+                    }
+                } catch (err) {
+                    showToast('Lỗi: ' + err.message, false);
+                } finally {
+                    btn.textContent = 'Nhận Thu Gom';
+                    btn.disabled = false;
+                }
+            });
         });
     </script>
 </body>
