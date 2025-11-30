@@ -36,7 +36,6 @@ function buildFooter() {
                     <li><a href="/collection.html">Điểm Thu Gom</a></li>
                     <li><a href="/map.html">Bản đồ Rác</a></li>
                     <li><a href="/contact.html">Liên hệ & Phản hồi</a></li>
-                    <li><a href="/admin.html">Quản trị (Admin)</a></li>
                 </ul>
             </div>
 
